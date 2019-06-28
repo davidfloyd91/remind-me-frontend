@@ -24,13 +24,14 @@ var User = /** @class */ (function () {
     }
     return User;
 }());
-var JWTToken = /** @class */ (function () {
-    function JWTToken() {
+var Token = /** @class */ (function () {
+    function Token(res) {
+        this.token = res.token;
     }
-    return JWTToken;
+    return Token;
 }());
-// current user
-var user;
+// jwt
+var token;
 // events arrays
 var eventsToday = [];
 // login/signup form values
@@ -38,6 +39,12 @@ var username;
 var email;
 var password;
 document.addEventListener("DOMContentLoaded", function (event) {
+    chrome.storage.local.get(["token"], function (res) {
+        if (res["token"]) {
+            token = res["token"];
+        }
+        ;
+    });
     document.addEventListener("click", function (e) {
         if (e["target"]["attributes"]["id"]["value"] === "today") {
             getEventsToday();
@@ -78,10 +85,10 @@ document.addEventListener("DOMContentLoaded", function (event) {
             })
         })
             .then(function (res) { return res.json(); })
-            .then(function (userObj) {
-            user = new User(userObj);
-        })
-            .then(function () { return console.log(user); });
+            .then(function (jwt) {
+            chrome.storage.local.set({ token: jwt });
+            token = jwt;
+        });
     }
     function getEventsToday() {
         fetch(url + "/users/" + user_id + "/events/today")
@@ -94,6 +101,6 @@ document.addEventListener("DOMContentLoaded", function (event) {
                 eventsToday.push(new ScheduledEvent(scheduledEvent));
             }
         })
-            .then(function () { return console.log(eventsToday); });
+            .then(function () { return console.log('eventsToday', eventsToday); });
     }
 });

@@ -44,13 +44,10 @@ class User {
 class Token {
   token: string;
 
-  // constructor(res: any) {
-  //
-  // }
+  constructor(res: any) {
+    this.token = res.token;
+  }
 }
-
-// current user
-let user: User;
 
 // jwt
 let token: Token;
@@ -64,6 +61,12 @@ let email: string;
 let password: string;
 
 document.addEventListener("DOMContentLoaded", event => {
+  chrome.storage.local.get(["token"], res => {
+    if (res["token"]) {
+      token = res["token"];
+    };
+  });
+
   document.addEventListener("click", e => {
     if (e["target"]["attributes"]["id"]["value"] === "today") {
       getEventsToday()
@@ -104,10 +107,10 @@ document.addEventListener("DOMContentLoaded", event => {
       })
     })
     .then(res => res.json())
-    .then(userObj => {
-      user = new User(userObj);
+    .then(jwt => {
+      chrome.storage.local.set({ token: jwt });
+      token = jwt;
     })
-    .then(() => console.log('user', user))
   }
 
   function getEventsToday() {
