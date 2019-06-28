@@ -1,3 +1,5 @@
+// chrome-extension://nodpecpogkkofipgdkcchnbecnicoggl
+
 const url: string = "http://localhost:8000";
 let user_id: number = 1;
 
@@ -109,12 +111,16 @@ document.addEventListener("DOMContentLoaded", event => {
     .then(res => res.json())
     .then(jwt => {
       chrome.storage.local.set({ token: jwt });
-      token = jwt;
+      token = jwt
     })
   }
 
   function getEventsToday() {
-    fetch(url + "/users/" + user_id + "/events/today")
+    fetch(url + "/users/" + user_id + "/events/today", {
+      headers: {
+        "Token": token["Token"],
+      },
+    })
     .then(res => res.json())
     .then(eventsArr => {
       // clear eventsToday only if response is parsed

@@ -1,3 +1,4 @@
+// chrome-extension://nodpecpogkkofipgdkcchnbecnicoggl
 var url = "http://localhost:8000";
 var user_id = 1;
 var ScheduledEvent = /** @class */ (function () {
@@ -41,7 +42,9 @@ var password;
 document.addEventListener("DOMContentLoaded", function (event) {
     chrome.storage.local.get(["token"], function (res) {
         if (res["token"]) {
+            console.log(res);
             token = res["token"];
+            console.log(token);
         }
         ;
     });
@@ -91,7 +94,11 @@ document.addEventListener("DOMContentLoaded", function (event) {
         });
     }
     function getEventsToday() {
-        fetch(url + "/users/" + user_id + "/events/today")
+        fetch(url + "/users/" + user_id + "/events/today", {
+            headers: {
+                "Token": token["Token"]
+            }
+        })
             .then(function (res) { return res.json(); })
             .then(function (eventsArr) {
             // clear eventsToday only if response is parsed
