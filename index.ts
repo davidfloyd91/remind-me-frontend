@@ -1,5 +1,3 @@
-// chrome-extension://nodpecpogkkofipgdkcchnbecnicoggl
-
 const url: string = "http://localhost:8000";
 let user_id: number = 1;
 
@@ -57,10 +55,14 @@ let token: Token;
 // events arrays
 let eventsToday: ScheduledEvent[] = [];
 
-// login/signup form values
+// signup form values
 let username: string;
 let email: string;
 let password: string;
+
+// login form values
+let loginUsername: string;
+let loginPassword: string;
 
 document.addEventListener("DOMContentLoaded", event => {
   chrome.storage.local.get(["token"], res => {
@@ -76,6 +78,7 @@ document.addEventListener("DOMContentLoaded", event => {
   });
 
   document.addEventListener("input", e => {
+    // signup fields
     if (e["target"]["attributes"]["id"]["value"] === "username") {
       username = e["target"]["value"];
     };
@@ -87,6 +90,15 @@ document.addEventListener("DOMContentLoaded", event => {
     if (e["target"]["attributes"]["id"]["value"] === "password") {
       password = e["target"]["value"];
     };
+
+    // login fields
+    if (e["target"]["attributes"]["id"]["value"] === "login-username") {
+      loginUsername = e["target"]["value"];
+    };
+
+    if (e["target"]["attributes"]["id"]["value"] === "login-password") {
+      loginPassword = e["target"]["value"];
+    };
   });
 
   document.addEventListener("submit", e => {
@@ -94,9 +106,23 @@ document.addEventListener("DOMContentLoaded", event => {
     if (e["target"]["attributes"]["id"]["value"] === "signup") {
       signup();
     };
+
+    if (e["target"]["attributes"]["id"]["value"] === "login") {
+      login();
+    };
   });
 
-  function signup() {
+  const parseJwt = (token) => {
+    const base64Url = token["Token"].split(".")[1];
+    const base64 = base64Url.replace(/-/g, "+").replace(/_/g, "/");
+    const jsonPayload = decodeURIComponent(atob(base64).split("").map((c) => {
+        return "%" + ("00" + c.charCodeAt(0).toString(16)).slice(-2);
+    }).join(""));
+
+    return JSON.parse(jsonPayload);
+  };
+
+  const signup = () => {
     fetch(url + "/signup", {
       method: "POST",
       headers: {
@@ -111,11 +137,30 @@ document.addEventListener("DOMContentLoaded", event => {
     .then(res => res.json())
     .then(jwt => {
       chrome.storage.local.set({ token: jwt });
-      token = jwt
+      token = jwt;
     })
   }
 
-  function getEventsToday() {
+  const login = () => {
+    fetch(url + "/signup", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        username: username,
+        password: password
+      })
+    })
+    .then(res => res.json())
+    .then(jwt => {
+      chrome.storage.local.set({ token: jwt });
+      token = jwt;
+      console.log(parseJwt(token));
+    })
+  }
+
+  const getEventsToday = () => {
     fetch(url + "/users/" + user_id + "/events/today", {
       headers: {
         "Token": token["Token"],

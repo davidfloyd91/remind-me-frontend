@@ -1,4 +1,3 @@
-// chrome-extension://nodpecpogkkofipgdkcchnbecnicoggl
 var url = "http://localhost:8000";
 var user_id = 1;
 var ScheduledEvent = /** @class */ (function () {
@@ -35,16 +34,17 @@ var Token = /** @class */ (function () {
 var token;
 // events arrays
 var eventsToday = [];
-// login/signup form values
+// signup form values
 var username;
 var email;
 var password;
+// login form values
+var loginUsername;
+var loginPassword;
 document.addEventListener("DOMContentLoaded", function (event) {
     chrome.storage.local.get(["token"], function (res) {
         if (res["token"]) {
-            console.log(res);
             token = res["token"];
-            console.log(token);
         }
         ;
     });
@@ -55,6 +55,7 @@ document.addEventListener("DOMContentLoaded", function (event) {
         ;
     });
     document.addEventListener("input", function (e) {
+        // signup fields
         if (e["target"]["attributes"]["id"]["value"] === "username") {
             username = e["target"]["value"];
         }
@@ -67,6 +68,15 @@ document.addEventListener("DOMContentLoaded", function (event) {
             password = e["target"]["value"];
         }
         ;
+        // login fields
+        if (e["target"]["attributes"]["id"]["value"] === "login-username") {
+            loginUsername = e["target"]["value"];
+        }
+        ;
+        if (e["target"]["attributes"]["id"]["value"] === "login-password") {
+            loginPassword = e["target"]["value"];
+        }
+        ;
     });
     document.addEventListener("submit", function (e) {
         e.preventDefault();
@@ -74,8 +84,20 @@ document.addEventListener("DOMContentLoaded", function (event) {
             signup();
         }
         ;
+        if (e["target"]["attributes"]["id"]["value"] === "login") {
+            login();
+        }
+        ;
     });
-    function signup() {
+    var parseJwt = function (token) {
+        var base64Url = token["Token"].split(".")[1];
+        var base64 = base64Url.replace(/-/g, "+").replace(/_/g, "/");
+        var jsonPayload = decodeURIComponent(atob(base64).split("").map(function (c) {
+            return "%" + ("00" + c.charCodeAt(0).toString(16)).slice(-2);
+        }).join(""));
+        return JSON.parse(jsonPayload);
+    };
+    var signup = function () {
         fetch(url + "/signup", {
             method: "POST",
             headers: {
@@ -92,8 +114,26 @@ document.addEventListener("DOMContentLoaded", function (event) {
             chrome.storage.local.set({ token: jwt });
             token = jwt;
         });
-    }
-    function getEventsToday() {
+    };
+    var login = function () {
+        fetch(url + "/signup", {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json"
+            },
+            body: JSON.stringify({
+                username: username,
+                password: password
+            })
+        })
+            .then(function (res) { return res.json(); })
+            .then(function (jwt) {
+            chrome.storage.local.set({ token: jwt });
+            token = jwt;
+            console.log(parseJwt(token));
+        });
+    };
+    var getEventsToday = function () {
         fetch(url + "/users/" + user_id + "/events/today", {
             headers: {
                 "Token": token["Token"]
@@ -109,5 +149,5 @@ document.addEventListener("DOMContentLoaded", function (event) {
             }
         })
             .then(function () { return console.log('eventsToday', eventsToday); });
-    }
+    };
 });
