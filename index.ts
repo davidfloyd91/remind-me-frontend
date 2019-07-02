@@ -189,12 +189,12 @@ document.addEventListener("DOMContentLoaded", (event) => {
       return
     };
 
+    // turn into real error handling
     if (!rawToken) {
       console.log("no rawToken");
       return
     };
 
-    console.log(userId)
     fetch(url + "/users/" + userId + "/events/" + timeframe, {
       headers: {
         "Token": rawToken.token,
