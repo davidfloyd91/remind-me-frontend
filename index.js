@@ -1,5 +1,4 @@
 var url = "http://localhost:8000";
-var userId;
 var ScheduledEvent = /** @class */ (function () {
     function ScheduledEvent(res) {
         this.id = res.ID;
@@ -24,14 +23,12 @@ var User = /** @class */ (function () {
     }
     return User;
 }());
-// eg: {Token: "eyJhbGciOiJIUz...VTxj_CNCaRNU"}
 var RawToken = /** @class */ (function () {
     function RawToken(res) {
         this.token = res.Token;
     }
     return RawToken;
 }());
-// eg: {"UserID":27,"exp":1562113682}
 var ParsedToken = /** @class */ (function () {
     function ParsedToken(payload) {
         this.userId = payload.UserID;
@@ -42,6 +39,7 @@ var ParsedToken = /** @class */ (function () {
 // jwt
 var rawToken;
 var parsedToken;
+var userId;
 // events arrays
 var eventsToday = [];
 // signup form values
@@ -55,7 +53,7 @@ document.addEventListener("DOMContentLoaded", function (event) {
     chrome.storage.local.get(["token"], function (res) {
         if (res["token"]) {
             rawToken = res["token"];
-            handleToken(rawToken);
+            handleToken(rawToken, true);
         }
         ;
     });
@@ -100,22 +98,21 @@ document.addEventListener("DOMContentLoaded", function (event) {
         }
         ;
     });
-    var handleToken = function (jwt) {
+    var handleToken = function (jwt, local) {
+        if (local === void 0) { local = false; }
+        if (!local) {
+            // set to local storage before initializing as RawToken so format matches fetch response
+            chrome.storage.local.set({ token: jwt });
+        }
+        ;
         rawToken = new RawToken(jwt);
-        chrome.storage.local.set({ token: rawToken });
         var base64Url = rawToken.token.split(".")[1];
         var base64 = base64Url.replace(/-/g, "+").replace(/_/g, "/");
         var jsonPayload = decodeURIComponent(atob(base64).split("").map(function (c) {
             return "%" + ("00" + c.charCodeAt(0).toString(16)).slice(-2);
         }).join(""));
-        if (jsonPayload) {
-            parsedToken = new ParsedToken(JSON.parse(jsonPayload));
-        }
-        ;
-        if (parsedToken) {
-            userId = parsedToken.userId;
-        }
-        ;
+        parsedToken = new ParsedToken(JSON.parse(jsonPayload));
+        userId = parsedToken.userId;
     };
     var signup = function () {
         fetch(url + "/signup", {
@@ -131,7 +128,7 @@ document.addEventListener("DOMContentLoaded", function (event) {
         })
             .then(function (res) { return res.json(); })
             .then(function (jwt) {
-            handleToken(jwt);
+            handleToken(jwt, false);
         });
     };
     var login = function () {
@@ -147,19 +144,21 @@ document.addEventListener("DOMContentLoaded", function (event) {
         })
             .then(function (res) { return res.json(); })
             .then(function (jwt) {
-            handleToken(jwt);
+            handleToken(jwt, false);
         });
     };
     var getEventsToday = function () {
         if (!userId) {
-            console.log("no user id");
+            console.log("no userId");
             return;
         }
         ;
-        console.log(rawToken.token);
+        if (!rawToken) {
+            console.log("now rawToken");
+        }
         fetch(url + "/users/" + userId + "/events/today", {
             headers: {
-                "Token": rawToken["token"]
+                "Token": rawToken.token
             }
         })
             .then(function (res) { return res.json(); })

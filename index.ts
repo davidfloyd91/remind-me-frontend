@@ -1,5 +1,4 @@
 const url: string = "http://localhost:8000";
-let userId: number;
 
 class ScheduledEvent {
   id: number;
@@ -63,6 +62,8 @@ class ParsedToken {
 let rawToken: RawToken;
 let parsedToken: ParsedToken;
 
+let userId: number;
+
 // events arrays
 let eventsToday: ScheduledEvent[] = [];
 
@@ -75,21 +76,21 @@ let password: string;
 let loginUsername: string;
 let loginPassword: string;
 
-document.addEventListener("DOMContentLoaded", event => {
-  chrome.storage.local.get(["token"], res => {
+document.addEventListener("DOMContentLoaded", (event) => {
+  chrome.storage.local.get(["token"], (res) => {
     if (res["token"]) {
       rawToken = res["token"];
-      handleToken(rawToken);
+      handleToken(rawToken, true);
     };
   });
 
-  document.addEventListener("click", e => {
+  document.addEventListener("click", (e) => {
     if (e["target"]["attributes"]["id"]["value"] === "today") {
       getEventsToday()
     };
   });
 
-  document.addEventListener("input", e => {
+  document.addEventListener("input", (e) => {
     // signup fields
     if (e["target"]["attributes"]["id"]["value"] === "username") {
       username = e["target"]["value"];
@@ -113,7 +114,7 @@ document.addEventListener("DOMContentLoaded", event => {
     };
   });
 
-  document.addEventListener("submit", e => {
+  document.addEventListener("submit", (e) => {
     e.preventDefault();
     if (e["target"]["attributes"]["id"]["value"] === "signup") {
       signup();
@@ -124,9 +125,13 @@ document.addEventListener("DOMContentLoaded", event => {
     };
   });
 
-  const handleToken = (jwt: object) => {
+  const handleToken = (jwt: object, local=false) => {
+    if (!local) {
+      // set to local storage before initializing as RawToken so format matches fetch response
+      chrome.storage.local.set({ token: jwt });
+    };
+
     rawToken = new RawToken(jwt);
-    chrome.storage.local.set({ token: rawToken });
 
     const base64Url: string = rawToken.token.split(".")[1];
     const base64: string = base64Url.replace(/-/g, "+").replace(/_/g, "/");
@@ -134,13 +139,8 @@ document.addEventListener("DOMContentLoaded", event => {
         return "%" + ("00" + c.charCodeAt(0).toString(16)).slice(-2);
     }).join(""));
 
-    if (jsonPayload) {
-      parsedToken = new ParsedToken(JSON.parse(jsonPayload));
-    };
-
-    if (parsedToken) {
-      userId = parsedToken.userId;
-    };
+    parsedToken = new ParsedToken(JSON.parse(jsonPayload));
+    userId = parsedToken.userId;
   };
 
   const signup = () => {
@@ -157,7 +157,7 @@ document.addEventListener("DOMContentLoaded", event => {
     })
     .then(res => res.json())
     .then(jwt => {
-      handleToken(jwt);
+      handleToken(jwt, false);
     })
   }
 
@@ -174,21 +174,23 @@ document.addEventListener("DOMContentLoaded", event => {
     })
     .then(res => res.json())
     .then(jwt => {
-      handleToken(jwt);
+      handleToken(jwt, false);
     })
   }
 
   const getEventsToday = () => {
     if (!userId) {
-      console.log("no user id")
+      console.log("no userId")
       return
     };
 
-    console.log(rawToken.token)
+    if (!rawToken) {
+      console.log("now rawToken")
+    }
 
     fetch(url + "/users/" + userId + "/events/today", {
       headers: {
-        "Token": rawToken["token"],
+        "Token": rawToken.token,
       },
     })
     .then(res => res.json())
