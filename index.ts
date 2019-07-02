@@ -10,15 +10,15 @@ class ScheduledEvent {
   updated: string;
   deleted: string;
 
-  constructor(res: any) {
-    this.id = res.ID;
-    this.userId = res.user_id;
-    this.name = res.name;
-    this.description = res.description;
-    this.scheduled = res.scheduled;
-    this.created = res.CreatedAt; // include this?
-    this.updated = res.UpdatedAt; // include this?
-    this.deleted = res.DeletedAt; // create some kind of trash?
+  constructor(a: any) {
+    this.id = a.ID;
+    this.userId = a.user_id;
+    this.name = a.name;
+    this.description = a.description;
+    this.scheduled = a.scheduled;
+    this.created = a.CreatedAt; // include this?
+    this.updated = a.UpdatedAt; // include this?
+    this.deleted = a.DeletedAt; // create some kind of trash?
   }
 }
 
@@ -30,21 +30,21 @@ class User {
   updated: string;
   deleted: string;
 
-  constructor(res: any) {
-    this.id = res.ID;
-    this.username = res.username;
-    this.email = res.email;
-    this.created = res.CreatedAt; // include this?
-    this.updated = res.UpdatedAt; // this?
-    this.deleted = res.DeletedAt; // this?
+  constructor(a: any) {
+    this.id = a.ID;
+    this.username = a.username;
+    this.email = a.email;
+    this.created = a.CreatedAt; // include this?
+    this.updated = a.UpdatedAt; // this?
+    this.deleted = a.DeletedAt; // this?
   }
 }
 
 class RawToken {
   token: string;
 
-  constructor(res: any) {
-    this.token = res.Token;
+  constructor(a: any) {
+    this.token = a.Token;
   }
 }
 
@@ -52,20 +52,19 @@ class ParsedToken {
   userId: number;
   exp: number;
 
-  constructor(payload: any) {
-    this.userId = payload.UserID;
-    this.exp = payload.exp;
+  constructor(a: any) {
+    this.userId = a.UserID;
+    this.exp = a.exp;
   }
 }
 
 // jwt
 let rawToken: RawToken;
 let parsedToken: ParsedToken;
-
 let userId: number;
 
-// events arrays
-let eventsToday: ScheduledEvent[] = [];
+// events array
+let events: ScheduledEvent[] = [];
 
 // signup form values
 let username: string;
@@ -77,16 +76,20 @@ let loginUsername: string;
 let loginPassword: string;
 
 document.addEventListener("DOMContentLoaded", (event) => {
+  // get token from local storage
   chrome.storage.local.get(["token"], (res) => {
     if (res["token"]) {
-      rawToken = res["token"];
-      handleToken(rawToken, true);
+      handleToken(res["token"], true);
     };
   });
 
   document.addEventListener("click", (e) => {
     if (e["target"]["attributes"]["id"]["value"] === "today") {
-      getEventsToday()
+      getEvents("today");
+    };
+
+    if (e["target"]["attributes"]["id"]["value"] === "tomorrow") {
+      getEvents("tomorrow");
     };
   });
 
@@ -128,6 +131,7 @@ document.addEventListener("DOMContentLoaded", (event) => {
   const handleToken = (jwt: object, local=false) => {
     if (!local) {
       // set to local storage before initializing as RawToken so format matches fetch response
+      chrome.storage.local.remove(["token"]);
       chrome.storage.local.set({ token: jwt });
     };
 
@@ -162,14 +166,14 @@ document.addEventListener("DOMContentLoaded", (event) => {
   }
 
   const login = () => {
-    fetch(url + "/signup", {
+    fetch(url + "/login", {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
       },
       body: JSON.stringify({
-        username: username,
-        password: password
+        username: loginUsername,
+        password: loginPassword
       })
     })
     .then(res => res.json())
@@ -178,17 +182,20 @@ document.addEventListener("DOMContentLoaded", (event) => {
     })
   }
 
-  const getEventsToday = () => {
+  const getEvents = (timeframe: string) => {
+    // turn into real error handling
     if (!userId) {
-      console.log("no userId")
+      console.log("no userId");
       return
     };
 
     if (!rawToken) {
-      console.log("now rawToken")
-    }
+      console.log("no rawToken");
+      return
+    };
 
-    fetch(url + "/users/" + userId + "/events/today", {
+    console.log(userId)
+    fetch(url + "/users/" + userId + "/events/" + timeframe, {
       headers: {
         "Token": rawToken.token,
       },
@@ -196,11 +203,11 @@ document.addEventListener("DOMContentLoaded", (event) => {
     .then(res => res.json())
     .then(eventsArr => {
       // clear eventsToday only if response is parsed
-      eventsToday = [];
+      events = [];
       for (let scheduledEvent of eventsArr) {
-        eventsToday.push(new ScheduledEvent(scheduledEvent));
+        events.push(new ScheduledEvent(scheduledEvent));
       }
     })
-    .then(() => console.log('eventsToday', eventsToday))
+    .then(() => console.log('events', timeframe, events))
   }
 });

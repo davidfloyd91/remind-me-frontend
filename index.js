@@ -1,38 +1,38 @@
 var url = "http://localhost:8000";
 var ScheduledEvent = /** @class */ (function () {
-    function ScheduledEvent(res) {
-        this.id = res.ID;
-        this.userId = res.user_id;
-        this.name = res.name;
-        this.description = res.description;
-        this.scheduled = res.scheduled;
-        this.created = res.CreatedAt; // include this?
-        this.updated = res.UpdatedAt; // include this?
-        this.deleted = res.DeletedAt; // create some kind of trash?
+    function ScheduledEvent(a) {
+        this.id = a.ID;
+        this.userId = a.user_id;
+        this.name = a.name;
+        this.description = a.description;
+        this.scheduled = a.scheduled;
+        this.created = a.CreatedAt; // include this?
+        this.updated = a.UpdatedAt; // include this?
+        this.deleted = a.DeletedAt; // create some kind of trash?
     }
     return ScheduledEvent;
 }());
 var User = /** @class */ (function () {
-    function User(res) {
-        this.id = res.ID;
-        this.username = res.username;
-        this.email = res.email;
-        this.created = res.CreatedAt; // include this?
-        this.updated = res.UpdatedAt; // this?
-        this.deleted = res.DeletedAt; // this?
+    function User(a) {
+        this.id = a.ID;
+        this.username = a.username;
+        this.email = a.email;
+        this.created = a.CreatedAt; // include this?
+        this.updated = a.UpdatedAt; // this?
+        this.deleted = a.DeletedAt; // this?
     }
     return User;
 }());
 var RawToken = /** @class */ (function () {
-    function RawToken(res) {
-        this.token = res.Token;
+    function RawToken(a) {
+        this.token = a.Token;
     }
     return RawToken;
 }());
 var ParsedToken = /** @class */ (function () {
-    function ParsedToken(payload) {
-        this.userId = payload.UserID;
-        this.exp = payload.exp;
+    function ParsedToken(a) {
+        this.userId = a.UserID;
+        this.exp = a.exp;
     }
     return ParsedToken;
 }());
@@ -40,8 +40,8 @@ var ParsedToken = /** @class */ (function () {
 var rawToken;
 var parsedToken;
 var userId;
-// events arrays
-var eventsToday = [];
+// events array
+var events = [];
 // signup form values
 var username;
 var email;
@@ -50,16 +50,20 @@ var password;
 var loginUsername;
 var loginPassword;
 document.addEventListener("DOMContentLoaded", function (event) {
+    // get token from local storage
     chrome.storage.local.get(["token"], function (res) {
         if (res["token"]) {
-            rawToken = res["token"];
-            handleToken(rawToken, true);
+            handleToken(res["token"], true);
         }
         ;
     });
     document.addEventListener("click", function (e) {
         if (e["target"]["attributes"]["id"]["value"] === "today") {
-            getEventsToday();
+            getEvents("today");
+        }
+        ;
+        if (e["target"]["attributes"]["id"]["value"] === "tomorrow") {
+            getEvents("tomorrow");
         }
         ;
     });
@@ -102,6 +106,7 @@ document.addEventListener("DOMContentLoaded", function (event) {
         if (local === void 0) { local = false; }
         if (!local) {
             // set to local storage before initializing as RawToken so format matches fetch response
+            chrome.storage.local.remove(["token"]);
             chrome.storage.local.set({ token: jwt });
         }
         ;
@@ -132,14 +137,14 @@ document.addEventListener("DOMContentLoaded", function (event) {
         });
     };
     var login = function () {
-        fetch(url + "/signup", {
+        fetch(url + "/login", {
             method: "POST",
             headers: {
                 "Content-Type": "application/json"
             },
             body: JSON.stringify({
-                username: username,
-                password: password
+                username: loginUsername,
+                password: loginPassword
             })
         })
             .then(function (res) { return res.json(); })
@@ -147,16 +152,20 @@ document.addEventListener("DOMContentLoaded", function (event) {
             handleToken(jwt, false);
         });
     };
-    var getEventsToday = function () {
+    var getEvents = function (timeframe) {
+        // turn into real error handling
         if (!userId) {
             console.log("no userId");
             return;
         }
         ;
         if (!rawToken) {
-            console.log("now rawToken");
+            console.log("no rawToken");
+            return;
         }
-        fetch(url + "/users/" + userId + "/events/today", {
+        ;
+        console.log(userId);
+        fetch(url + "/users/" + userId + "/events/" + timeframe, {
             headers: {
                 "Token": rawToken.token
             }
@@ -164,12 +173,12 @@ document.addEventListener("DOMContentLoaded", function (event) {
             .then(function (res) { return res.json(); })
             .then(function (eventsArr) {
             // clear eventsToday only if response is parsed
-            eventsToday = [];
+            events = [];
             for (var _i = 0, eventsArr_1 = eventsArr; _i < eventsArr_1.length; _i++) {
                 var scheduledEvent = eventsArr_1[_i];
-                eventsToday.push(new ScheduledEvent(scheduledEvent));
+                events.push(new ScheduledEvent(scheduledEvent));
             }
         })
-            .then(function () { return console.log('eventsToday', eventsToday); });
+            .then(function () { return console.log('events', timeframe, events); });
     };
 });
