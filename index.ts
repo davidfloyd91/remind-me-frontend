@@ -1,5 +1,5 @@
 const url: string = "http://localhost:8000";
-let user_id: number = 1;
+let userId: number;
 
 class ScheduledEvent {
   id: number;
@@ -41,16 +41,27 @@ class User {
   }
 }
 
-class Token {
+class RawToken {
   token: string;
 
   constructor(res: any) {
-    this.token = res.token;
+    this.token = res.Token;
+  }
+}
+
+class ParsedToken {
+  userId: number;
+  exp: number;
+
+  constructor(payload: any) {
+    this.userId = payload.UserID;
+    this.exp = payload.exp;
   }
 }
 
 // jwt
-let token: Token;
+let rawToken: RawToken;
+let parsedToken: ParsedToken;
 
 // events arrays
 let eventsToday: ScheduledEvent[] = [];
@@ -67,7 +78,8 @@ let loginPassword: string;
 document.addEventListener("DOMContentLoaded", event => {
   chrome.storage.local.get(["token"], res => {
     if (res["token"]) {
-      token = res["token"];
+      rawToken = res["token"];
+      handleToken(rawToken);
     };
   });
 
@@ -112,14 +124,23 @@ document.addEventListener("DOMContentLoaded", event => {
     };
   });
 
-  const parseJwt = (token) => {
-    const base64Url = token["Token"].split(".")[1];
-    const base64 = base64Url.replace(/-/g, "+").replace(/_/g, "/");
-    const jsonPayload = decodeURIComponent(atob(base64).split("").map((c) => {
+  const handleToken = (jwt: object) => {
+    rawToken = new RawToken(jwt);
+    chrome.storage.local.set({ token: rawToken });
+
+    const base64Url: string = rawToken.token.split(".")[1];
+    const base64: string = base64Url.replace(/-/g, "+").replace(/_/g, "/");
+    const jsonPayload: string = decodeURIComponent(atob(base64).split("").map((c) => {
         return "%" + ("00" + c.charCodeAt(0).toString(16)).slice(-2);
     }).join(""));
 
-    return JSON.parse(jsonPayload);
+    if (jsonPayload) {
+      parsedToken = new ParsedToken(JSON.parse(jsonPayload));
+    };
+
+    if (parsedToken) {
+      userId = parsedToken.userId;
+    };
   };
 
   const signup = () => {
@@ -136,8 +157,7 @@ document.addEventListener("DOMContentLoaded", event => {
     })
     .then(res => res.json())
     .then(jwt => {
-      chrome.storage.local.set({ token: jwt });
-      token = jwt;
+      handleToken(jwt);
     })
   }
 
@@ -154,16 +174,21 @@ document.addEventListener("DOMContentLoaded", event => {
     })
     .then(res => res.json())
     .then(jwt => {
-      chrome.storage.local.set({ token: jwt });
-      token = jwt;
-      console.log(parseJwt(token));
+      handleToken(jwt);
     })
   }
 
   const getEventsToday = () => {
-    fetch(url + "/users/" + user_id + "/events/today", {
+    if (!userId) {
+      console.log("no user id")
+      return
+    };
+
+    console.log(rawToken.token)
+
+    fetch(url + "/users/" + userId + "/events/today", {
       headers: {
-        "Token": token["Token"],
+        "Token": rawToken["token"],
       },
     })
     .then(res => res.json())
