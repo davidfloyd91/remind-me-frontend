@@ -97,6 +97,10 @@ document.addEventListener("DOMContentLoaded", (event) => {
     if (e["target"]["attributes"]["id"]["value"] === "tomorrow") {
       getEvents("tomorrow");
     };
+
+    if (e["target"]["attributes"]["id"]["value"] === "week") {
+      getEvents("week");
+    };
   });
 
   document.addEventListener("input", (e) => {
@@ -250,7 +254,7 @@ document.addEventListener("DOMContentLoaded", (event) => {
     })
     .then(res => res.json())
     .then(eventsArr => {
-      // clear eventsToday only if response is parsed
+      // clear events only if response is parsed
       events = [];
       for (let scheduledEvent of eventsArr) {
         events.push(new ScheduledEvent(scheduledEvent));

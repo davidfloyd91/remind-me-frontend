@@ -71,6 +71,10 @@ document.addEventListener("DOMContentLoaded", function (event) {
             getEvents("tomorrow");
         }
         ;
+        if (e["target"]["attributes"]["id"]["value"] === "week") {
+            getEvents("week");
+        }
+        ;
     });
     document.addEventListener("input", function (e) {
         // signup fields
@@ -217,7 +221,7 @@ document.addEventListener("DOMContentLoaded", function (event) {
         })
             .then(function (res) { return res.json(); })
             .then(function (eventsArr) {
-            // clear eventsToday only if response is parsed
+            // clear events only if response is parsed
             events = [];
             for (var _i = 0, eventsArr_1 = eventsArr; _i < eventsArr_1.length; _i++) {
                 var scheduledEvent = eventsArr_1[_i];
