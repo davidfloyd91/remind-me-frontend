@@ -179,7 +179,23 @@ document.addEventListener("DOMContentLoaded", function (event) {
         });
     };
     var createEvent = function () {
-        console.log("niceeeeee");
+        // timezone is hardcoded don't keep it that way
+        var eventDateTime = eventDate + "T" + eventTime + ":00-04:00";
+        fetch(url + "/events", {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json",
+                "Token": rawToken.token
+            },
+            body: JSON.stringify({
+                name: eventName,
+                description: eventDescription,
+                scheduled: eventDateTime,
+                user_id: userId
+            })
+        })
+            .then(function (res) { return res.json(); })
+            .then(console.log);
     };
     var getEvents = function (timeframe) {
         // turn into real error handling
