@@ -159,6 +159,22 @@ document.addEventListener("DOMContentLoaded", (event) => {
     };
   });
 
+  const eventsContainer = document.querySelector("#events-container");
+
+  const appendEvents = (events: ScheduledEvent[]) => {
+    eventsContainer.innerHTML = "";
+
+    events.forEach((evt) => {
+      eventsContainer.innerHTML += `
+        <div class="event-container">
+          <div class="event-name">${evt.name}</div>
+          <div class="event-description">${evt.description}</div>
+          <div class="event-scheduled">${evt.scheduled}</div>
+        </div>
+      `;
+    });
+  };
+
   const handleToken = (jwt: object, local=false) => {
     if (!local) {
       // set to local storage before initializing as RawToken so format matches fetch response
@@ -260,6 +276,8 @@ document.addEventListener("DOMContentLoaded", (event) => {
         events.push(new ScheduledEvent(scheduledEvent));
       }
     })
-    .then(() => console.log('events', timeframe, events))
-  }
+    .then(() => {
+      appendEvents(events);
+    });
+  };
 });

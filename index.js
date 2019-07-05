@@ -132,6 +132,13 @@ document.addEventListener("DOMContentLoaded", function (event) {
         }
         ;
     });
+    var eventsContainer = document.querySelector("#events-container");
+    var appendEvents = function (events) {
+        eventsContainer.innerHTML = "";
+        events.forEach(function (evt) {
+            eventsContainer.innerHTML += "\n        <div class=\"event-container\">\n          <div class=\"event-name\">" + evt.name + "</div>\n          <div class=\"event-description\">" + evt.description + "</div>\n          <div class=\"event-scheduled\">" + evt.scheduled + "</div>\n        </div>\n      ";
+        });
+    };
     var handleToken = function (jwt, local) {
         if (local === void 0) { local = false; }
         if (!local) {
@@ -228,6 +235,8 @@ document.addEventListener("DOMContentLoaded", function (event) {
                 events.push(new ScheduledEvent(scheduledEvent));
             }
         })
-            .then(function () { return console.log('events', timeframe, events); });
+            .then(function () {
+            appendEvents(events);
+        });
     };
 });
