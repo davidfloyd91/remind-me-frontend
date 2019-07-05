@@ -43,12 +43,17 @@ var userId;
 // events array
 var events = [];
 // signup form values
-var username;
-var email;
-var password;
+var signupUsername;
+var signupEmail;
+var signupPassword;
 // login form values
 var loginUsername;
 var loginPassword;
+// event form values
+var eventName;
+var eventDescription;
+var eventDate;
+var eventTime;
 document.addEventListener("DOMContentLoaded", function (event) {
     // get token from local storage
     chrome.storage.local.get(["token"], function (res) {
@@ -69,16 +74,16 @@ document.addEventListener("DOMContentLoaded", function (event) {
     });
     document.addEventListener("input", function (e) {
         // signup fields
-        if (e["target"]["attributes"]["id"]["value"] === "username") {
-            username = e["target"]["value"];
+        if (e["target"]["attributes"]["id"]["value"] === "signup-username") {
+            signupUsername = e["target"]["value"];
         }
         ;
-        if (e["target"]["attributes"]["id"]["value"] === "email") {
-            email = e["target"]["value"];
+        if (e["target"]["attributes"]["id"]["value"] === "signup-email") {
+            signupEmail = e["target"]["value"];
         }
         ;
-        if (e["target"]["attributes"]["id"]["value"] === "password") {
-            password = e["target"]["value"];
+        if (e["target"]["attributes"]["id"]["value"] === "signup-password") {
+            signupPassword = e["target"]["value"];
         }
         ;
         // login fields
@@ -90,6 +95,23 @@ document.addEventListener("DOMContentLoaded", function (event) {
             loginPassword = e["target"]["value"];
         }
         ;
+        // event fields
+        if (e["target"]["attributes"]["id"]["value"] === "event-name") {
+            eventName = e["target"]["value"];
+        }
+        ;
+        if (e["target"]["attributes"]["id"]["value"] === "event-description") {
+            eventDescription = e["target"]["value"];
+        }
+        ;
+        if (e["target"]["attributes"]["id"]["value"] === "event-date") {
+            eventDate = e["target"]["value"];
+        }
+        ;
+        if (e["target"]["attributes"]["id"]["value"] === "event-time") {
+            eventTime = e["target"]["value"];
+        }
+        ;
     });
     document.addEventListener("submit", function (e) {
         e.preventDefault();
@@ -99,6 +121,10 @@ document.addEventListener("DOMContentLoaded", function (event) {
         ;
         if (e["target"]["attributes"]["id"]["value"] === "login") {
             login();
+        }
+        ;
+        if (e["target"]["attributes"]["id"]["value"] === "create-event") {
+            createEvent();
         }
         ;
     });
@@ -126,9 +152,9 @@ document.addEventListener("DOMContentLoaded", function (event) {
                 "Content-Type": "application/json"
             },
             body: JSON.stringify({
-                username: username,
-                email: email,
-                password: password
+                username: signupUsername,
+                email: signupEmail,
+                password: signupPassword
             })
         })
             .then(function (res) { return res.json(); })
@@ -151,6 +177,9 @@ document.addEventListener("DOMContentLoaded", function (event) {
             .then(function (jwt) {
             handleToken(jwt, false);
         });
+    };
+    var createEvent = function () {
+        console.log("niceeeeee");
     };
     var getEvents = function (timeframe) {
         // turn into real error handling

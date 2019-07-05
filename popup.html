@@ -8,10 +8,10 @@
   <body>
     <h3>Sign up</h3>
     <form id="signup">
-      <input type="text" id="username" placeholder="username"></input>
-      <input type="text" id="email" placeholder="email"></input>
-      <input type="password" id="password" placeholder="password"></input>
-      <button type="submit" id="submit">Go</button>
+      <input type="text" id="signup-username" placeholder="signup-username"></input>
+      <input type="text" id="signup-email" placeholder="signup-email"></input>
+      <input type="password" id="signup-password" placeholder="signup-password"></input>
+      <button type="submit" id="signup-submit">Go</button>
     </form>
     <br/>
     <h3>Login</h3>
@@ -21,6 +21,16 @@
       <button type="submit" id="login-submit">Go</button>
     </form>
     <br/>
+    <h3>New Event</h3>
+    <form id="create-event">
+      <input type="text" id="event-name" placeholder="name"></input>
+      <input type="text" id="event-description" placeholder="description"></input>
+      <label for="event-date">Date</label>
+      <input type="date" id="event-date"></input>
+      <label for="event-time">Time</label>
+      <input type="time" id="event-time"></input>
+      <button type="submit" id="event-submit">Go</button>
+    </form>
     <button id="today">Today</button>
     <button id="tomorrow">Tomorrow</button>
   </body>

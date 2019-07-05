@@ -67,13 +67,19 @@ let userId: number;
 let events: ScheduledEvent[] = [];
 
 // signup form values
-let username: string;
-let email: string;
-let password: string;
+let signupUsername: string;
+let signupEmail: string;
+let signupPassword: string;
 
 // login form values
 let loginUsername: string;
 let loginPassword: string;
+
+// event form values
+let eventName: string;
+let eventDescription: string;
+let eventDate: string;
+let eventTime: string;
 
 document.addEventListener("DOMContentLoaded", (event) => {
   // get token from local storage
@@ -95,16 +101,16 @@ document.addEventListener("DOMContentLoaded", (event) => {
 
   document.addEventListener("input", (e) => {
     // signup fields
-    if (e["target"]["attributes"]["id"]["value"] === "username") {
-      username = e["target"]["value"];
+    if (e["target"]["attributes"]["id"]["value"] === "signup-username") {
+      signupUsername = e["target"]["value"];
     };
 
-    if (e["target"]["attributes"]["id"]["value"] === "email") {
-      email = e["target"]["value"];
+    if (e["target"]["attributes"]["id"]["value"] === "signup-email") {
+      signupEmail = e["target"]["value"];
     };
 
-    if (e["target"]["attributes"]["id"]["value"] === "password") {
-      password = e["target"]["value"];
+    if (e["target"]["attributes"]["id"]["value"] === "signup-password") {
+      signupPassword = e["target"]["value"];
     };
 
     // login fields
@@ -114,6 +120,23 @@ document.addEventListener("DOMContentLoaded", (event) => {
 
     if (e["target"]["attributes"]["id"]["value"] === "login-password") {
       loginPassword = e["target"]["value"];
+    };
+
+    // event fields
+    if (e["target"]["attributes"]["id"]["value"] === "event-name") {
+      eventName = e["target"]["value"];
+    };
+
+    if (e["target"]["attributes"]["id"]["value"] === "event-description") {
+      eventDescription = e["target"]["value"];
+    };
+
+    if (e["target"]["attributes"]["id"]["value"] === "event-date") {
+      eventDate = e["target"]["value"];
+    };
+
+    if (e["target"]["attributes"]["id"]["value"] === "event-time") {
+      eventTime = e["target"]["value"];
     };
   });
 
@@ -125,6 +148,10 @@ document.addEventListener("DOMContentLoaded", (event) => {
 
     if (e["target"]["attributes"]["id"]["value"] === "login") {
       login();
+    };
+
+    if (e["target"]["attributes"]["id"]["value"] === "create-event") {
+      createEvent();
     };
   });
 
@@ -154,9 +181,9 @@ document.addEventListener("DOMContentLoaded", (event) => {
         "Content-Type": "application/json",
       },
       body: JSON.stringify({
-        username: username,
-        email: email,
-        password: password
+        username: signupUsername,
+        email: signupEmail,
+        password: signupPassword
       })
     })
     .then(res => res.json())
@@ -181,6 +208,10 @@ document.addEventListener("DOMContentLoaded", (event) => {
       handleToken(jwt, false);
     })
   }
+
+  const createEvent= () => {
+    console.log("niceeeeee")
+  };
 
   const getEvents = (timeframe: string) => {
     // turn into real error handling
