@@ -127,15 +127,19 @@ document.addEventListener("DOMContentLoaded", (event) => {
     };
 
     if (e["target"]["attributes"]["id"]["value"] === "today") {
-      getEvents("today");
+      getEvents("/today");
     };
 
     if (e["target"]["attributes"]["id"]["value"] === "tomorrow") {
-      getEvents("tomorrow");
+      getEvents("/tomorrow");
     };
 
     if (e["target"]["attributes"]["id"]["value"] === "week") {
-      getEvents("week");
+      getEvents("/week");
+    };
+
+    if (e["target"]["attributes"]["id"]["value"] === "all") {
+      getEvents("");
     };
   });
 
@@ -323,7 +327,7 @@ document.addEventListener("DOMContentLoaded", (event) => {
       return
     };
 
-    fetch(url + "/users/" + userId + "/events/" + timeframe, {
+    fetch(url + "/users/" + userId + "/events" + timeframe, {
       headers: {
         "Token": rawToken.token,
       },
