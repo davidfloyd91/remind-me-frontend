@@ -90,7 +90,7 @@ document.addEventListener("DOMContentLoaded", (event) => {
   const loginButton = <HTMLButtonElement>document.querySelector("#login-button");
   const loginForm = <HTMLFormElement>document.querySelector("#login-form");
   const signupForm = <HTMLFormElement>document.querySelector("#signup-form");
-  const getEventsDiv = <HTMLDivElement>document.querySelector("#get-events-div");
+  const loggedInDiv = <HTMLDivElement>document.querySelector("#logged-in");
   const eventsContainer = <HTMLDivElement>document.querySelector("#events-container");
 
   // get token from local storage
@@ -220,7 +220,7 @@ document.addEventListener("DOMContentLoaded", (event) => {
 
     // user is logged in -- change display
     eventDiv["style"]["display"] = "block";
-    getEventsDiv["style"]["display"] = "block";
+    loggedInDiv["style"]["display"] = "block";
     logoutButton["style"]["display"] = "block";
     loginButton["style"]["display"] = "none";
     signupButton["style"]["display"] = "none";
@@ -281,9 +281,10 @@ document.addEventListener("DOMContentLoaded", (event) => {
     chrome.storage.local.remove(["token"]);
 
     loginDiv["style"]["display"] = "block";
+    signupButton["style"]["display"] = "block";
     logoutButton["style"]["display"] = "none";
     loginButton["style"]["display"] = "none";
-    signupButton["style"]["display"] = "block";
+    loggedInDiv["style"]["display"] = "none";
     signupDiv["style"]["display"] = "none";
     eventDiv["style"]["display"] = "none";
   };
