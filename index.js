@@ -55,14 +55,49 @@ var eventDescription;
 var eventDate;
 var eventTime;
 document.addEventListener("DOMContentLoaded", function (event) {
+    var signupDiv = document.querySelector("#signup-div");
+    var loginDiv = document.querySelector("#login-div");
+    var eventDiv = document.querySelector("#event-div");
+    var logoutButton = document.querySelector("#logout-button");
+    var signupButton = document.querySelector("#signup-button");
+    var loginButton = document.querySelector("#login-button");
+    var loginForm = document.querySelector("#login-form");
+    var signupForm = document.querySelector("#signup-form");
+    var getEventsDiv = document.querySelector("#get-events-div");
+    var eventsContainer = document.querySelector("#events-container");
     // get token from local storage
     chrome.storage.local.get(["token"], function (res) {
+        // if user is logged in
         if (res["token"]) {
-            handleToken(res["token"], true);
+            // hide signup and login forms
+            // signupDiv["style"]["display"] = "none";
+            signupDiv.style.display = "none";
+            signupButton["style"]["display"] = "none";
+            loginButton["style"]["display"] = "none";
+            loginDiv["style"]["display"] = "none";
+            handleToken(res["token"], true); // local is true
         }
         ;
     });
     document.addEventListener("click", function (e) {
+        if (e["target"]["attributes"]["id"]["value"] === "logout-button") {
+            logout();
+        }
+        ;
+        if (e["target"]["attributes"]["id"]["value"] === "signup-button") {
+            signupDiv["style"]["display"] = "block";
+            loginButton["style"]["display"] = "block";
+            loginDiv["style"]["display"] = "none";
+            signupButton["style"]["display"] = "none";
+        }
+        ;
+        if (e["target"]["attributes"]["id"]["value"] === "login-button") {
+            signupDiv["style"]["display"] = "none";
+            loginButton["style"]["display"] = "none";
+            loginDiv["style"]["display"] = "block";
+            signupButton["style"]["display"] = "block";
+        }
+        ;
         if (e["target"]["attributes"]["id"]["value"] === "today") {
             getEvents("today");
         }
@@ -119,26 +154,26 @@ document.addEventListener("DOMContentLoaded", function (event) {
     });
     document.addEventListener("submit", function (e) {
         e.preventDefault();
-        if (e["target"]["attributes"]["id"]["value"] === "signup") {
+        if (e["target"]["attributes"]["id"]["value"] === "signup-form") {
             signup();
         }
         ;
-        if (e["target"]["attributes"]["id"]["value"] === "login") {
+        if (e["target"]["attributes"]["id"]["value"] === "login-form") {
             login();
         }
         ;
-        if (e["target"]["attributes"]["id"]["value"] === "create-event") {
+        if (e["target"]["attributes"]["id"]["value"] === "event-form") {
             createEvent();
         }
         ;
     });
-    var eventsContainer = document.querySelector("#events-container");
     var appendEvents = function (events) {
         eventsContainer.innerHTML = "";
         events.forEach(function (evt) {
             eventsContainer.innerHTML += "\n        <div class=\"event-container\">\n          <div class=\"event-name\">" + evt.name + "</div>\n          <div class=\"event-description\">" + evt.description + "</div>\n          <div class=\"event-scheduled\">" + evt.scheduled + "</div>\n        </div>\n      ";
         });
     };
+    // local is false by default -- true only if token is fetched from Chrome local storage
     var handleToken = function (jwt, local) {
         if (local === void 0) { local = false; }
         if (!local) {
@@ -147,6 +182,16 @@ document.addEventListener("DOMContentLoaded", function (event) {
             chrome.storage.local.set({ token: jwt });
         }
         ;
+        // user is logged in -- change display
+        eventDiv["style"]["display"] = "block";
+        getEventsDiv["style"]["display"] = "block";
+        logoutButton["style"]["display"] = "block";
+        loginButton["style"]["display"] = "none";
+        signupButton["style"]["display"] = "none";
+        loginDiv["style"]["display"] = "none";
+        signupDiv["style"]["display"] = "none";
+        signupForm.reset();
+        loginForm.reset();
         rawToken = new RawToken(jwt);
         var base64Url = rawToken.token.split(".")[1];
         var base64 = base64Url.replace(/-/g, "+").replace(/_/g, "/");
@@ -188,6 +233,15 @@ document.addEventListener("DOMContentLoaded", function (event) {
             .then(function (jwt) {
             handleToken(jwt, false);
         });
+    };
+    var logout = function () {
+        chrome.storage.local.remove(["token"]);
+        loginDiv["style"]["display"] = "block";
+        logoutButton["style"]["display"] = "none";
+        loginButton["style"]["display"] = "none";
+        signupButton["style"]["display"] = "block";
+        signupDiv["style"]["display"] = "none";
+        eventDiv["style"]["display"] = "none";
     };
     var createEvent = function () {
         // timezone is hardcoded don't keep it that way

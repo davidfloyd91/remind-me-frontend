@@ -82,14 +82,50 @@ let eventDate: string;
 let eventTime: string;
 
 document.addEventListener("DOMContentLoaded", (event) => {
+  const signupDiv = <HTMLDivElement>document.querySelector("#signup-div");
+  const loginDiv = <HTMLDivElement>document.querySelector("#login-div");
+  const eventDiv = <HTMLDivElement>document.querySelector("#event-div");
+  const logoutButton = <HTMLButtonElement>document.querySelector("#logout-button");
+  const signupButton = <HTMLButtonElement>document.querySelector("#signup-button");
+  const loginButton = <HTMLButtonElement>document.querySelector("#login-button");
+  const loginForm = <HTMLFormElement>document.querySelector("#login-form");
+  const signupForm = <HTMLFormElement>document.querySelector("#signup-form");
+  const getEventsDiv = <HTMLDivElement>document.querySelector("#get-events-div");
+  const eventsContainer = <HTMLDivElement>document.querySelector("#events-container");
+
   // get token from local storage
   chrome.storage.local.get(["token"], (res) => {
+    // if user is logged in
     if (res["token"]) {
-      handleToken(res["token"], true);
+      // hide signup and login forms
+      signupDiv["style"]["display"] = "none";
+      signupButton["style"]["display"] = "none";
+      loginButton["style"]["display"] = "none";
+      loginDiv["style"]["display"] = "none";
+
+      handleToken(res["token"], true); // local is true
     };
   });
 
   document.addEventListener("click", (e) => {
+    if (e["target"]["attributes"]["id"]["value"] === "logout-button") {
+      logout();
+    };
+
+    if (e["target"]["attributes"]["id"]["value"] === "signup-button") {
+      signupDiv["style"]["display"] = "block";
+      loginButton["style"]["display"] = "block";
+      loginDiv["style"]["display"] = "none";
+      signupButton["style"]["display"] = "none";
+    };
+
+    if (e["target"]["attributes"]["id"]["value"] === "login-button") {
+      signupDiv["style"]["display"] = "none";
+      loginButton["style"]["display"] = "none";
+      loginDiv["style"]["display"] = "block";
+      signupButton["style"]["display"] = "block";
+    };
+
     if (e["target"]["attributes"]["id"]["value"] === "today") {
       getEvents("today");
     };
@@ -146,20 +182,19 @@ document.addEventListener("DOMContentLoaded", (event) => {
 
   document.addEventListener("submit", (e) => {
     e.preventDefault();
-    if (e["target"]["attributes"]["id"]["value"] === "signup") {
+
+    if (e["target"]["attributes"]["id"]["value"] === "signup-form") {
       signup();
     };
 
-    if (e["target"]["attributes"]["id"]["value"] === "login") {
+    if (e["target"]["attributes"]["id"]["value"] === "login-form") {
       login();
     };
 
-    if (e["target"]["attributes"]["id"]["value"] === "create-event") {
+    if (e["target"]["attributes"]["id"]["value"] === "event-form") {
       createEvent();
     };
   });
-
-  const eventsContainer = document.querySelector("#events-container");
 
   const appendEvents = (events: ScheduledEvent[]) => {
     eventsContainer.innerHTML = "";
@@ -175,12 +210,25 @@ document.addEventListener("DOMContentLoaded", (event) => {
     });
   };
 
+  // local is false by default -- true only if token is fetched from Chrome local storage
   const handleToken = (jwt: object, local=false) => {
     if (!local) {
       // set to local storage before initializing as RawToken so format matches fetch response
       chrome.storage.local.remove(["token"]);
       chrome.storage.local.set({ token: jwt });
     };
+
+    // user is logged in -- change display
+    eventDiv["style"]["display"] = "block";
+    getEventsDiv["style"]["display"] = "block";
+    logoutButton["style"]["display"] = "block";
+    loginButton["style"]["display"] = "none";
+    signupButton["style"]["display"] = "none";
+    loginDiv["style"]["display"] = "none";
+    signupDiv["style"]["display"] = "none";
+
+    signupForm.reset();
+    loginForm.reset();
 
     rawToken = new RawToken(jwt);
 
@@ -209,8 +257,8 @@ document.addEventListener("DOMContentLoaded", (event) => {
     .then(res => res.json())
     .then(jwt => {
       handleToken(jwt, false);
-    })
-  }
+    });
+  };
 
   const login = () => {
     fetch(url + "/login", {
@@ -226,8 +274,19 @@ document.addEventListener("DOMContentLoaded", (event) => {
     .then(res => res.json())
     .then(jwt => {
       handleToken(jwt, false);
-    })
-  }
+    });
+  };
+
+  const logout = () => {
+    chrome.storage.local.remove(["token"]);
+
+    loginDiv["style"]["display"] = "block";
+    logoutButton["style"]["display"] = "none";
+    loginButton["style"]["display"] = "none";
+    signupButton["style"]["display"] = "block";
+    signupDiv["style"]["display"] = "none";
+    eventDiv["style"]["display"] = "none";
+  };
 
   const createEvent= () => {
     // timezone is hardcoded don't keep it that way
