@@ -12,18 +12,27 @@
     <div id="signup-div" style="display:none;">
       <h3>Sign up</h3>
       <form id="signup-form">
-        <input type="text" id="signup-username" placeholder="signup-username"></input>
-        <input type="text" id="signup-email" placeholder="signup-email"></input>
-        <input type="password" id="signup-password" placeholder="signup-password"></input>
+        <label for="signup-username">Username</label>
+        <input type="text" id="signup-username"></input>
+        <label for="signup-email">Email (optional)</label>
+        <input type="text" id="signup-email"></input>
+        <label for="signup-password">Password</label>
+        <input type="password" id="signup-password"></input>
+        <br/>
+        <br/>
         <button type="submit" id="signup-submit">Go</button>
       </form>
       <br/>
     </div>
     <div id="login-div" style="display:block;">
-      <h3>Login</h3>
+      <h3>Log in</h3>
       <form id="login-form">
-        <input type="text" id="login-username" placeholder="username"></input>
-        <input type="password" id="login-password" placeholder="password"></input>
+        <label for="login-username">Username</label>
+        <input type="text" id="login-username"></input>
+        <label for="login-password">Password</label>
+        <input type="password" id="login-password"></input>
+        <br/>
+        <br/>
         <button type="submit" id="login-submit">Go</button>
       </form>
       <br/>
@@ -32,9 +41,9 @@
       <h3>New Event</h3>
       <form id="event-form">
         <label for="event-name">Name</label>
-        <input type="text" id="event-name" placeholder="name"></input>
+        <input type="text" id="event-name"></input>
         <label for="event-description">Description</label>
-        <input type="text" id="event-description" placeholder="description"></input>
+        <input type="text" id="event-description"></input>
         <label for="event-date">Date</label>
         <input type="date" id="event-date"></input>
         <br/>

@@ -54,6 +54,9 @@ var eventName;
 var eventDescription;
 var eventDate;
 var eventTime;
+// current date values
+var month;
+var date;
 document.addEventListener("DOMContentLoaded", function (event) {
     var signupDiv = document.querySelector("#signup-div");
     var loginDiv = document.querySelector("#login-div");
@@ -70,18 +73,17 @@ document.addEventListener("DOMContentLoaded", function (event) {
     var eventsContainer = document.querySelector("#events-container");
     // don't let user pick a date in the past
     var today = new Date();
-    var month = String(today.getMonth() + 1);
+    month = String(today.getMonth() + 1);
     if (month.length === 1) {
         month = "0" + month;
     }
     ;
-    var date = String(today.getDate());
+    date = String(today.getDate());
     if (date.length === 1) {
         date = "0" + date;
     }
     ;
     var minDate = today.getFullYear() + "-" + month + "-" + date;
-    // console.log(minDate)
     eventDateInput.min = minDate;
     // get token from local storage
     chrome.storage.local.get(["token"], function (res) {
@@ -97,93 +99,96 @@ document.addEventListener("DOMContentLoaded", function (event) {
         ;
     });
     document.addEventListener("click", function (e) {
-        if (e.target["attributes"]["id"]["value"] === "logout-button") {
+        var target = e.target;
+        if (target.id === "logout-button") {
             logout();
         }
         ;
-        if (e.target["attributes"]["id"]["value"] === "signup-button") {
+        if (target.id === "signup-button") {
             signupDiv.style.display = "block";
             loginButton.style.display = "block";
             loginDiv.style.display = "none";
             signupButton.style.display = "none";
         }
         ;
-        if (e.target["attributes"]["id"]["value"] === "login-button") {
+        if (target.id === "login-button") {
             signupDiv.style.display = "none";
             loginButton.style.display = "none";
             loginDiv.style.display = "block";
             signupButton.style.display = "block";
         }
         ;
-        if (e.target["attributes"]["id"]["value"] === "today") {
+        if (target.id === "today") {
             getEvents("/today");
         }
         ;
-        if (e.target["attributes"]["id"]["value"] === "tomorrow") {
+        if (target.id === "tomorrow") {
             getEvents("/tomorrow");
         }
         ;
-        if (e.target["attributes"]["id"]["value"] === "week") {
+        if (target.id === "week") {
             getEvents("/week");
         }
         ;
-        if (e.target["attributes"]["id"]["value"] === "all") {
+        if (target.id === "all") {
             getEvents("");
         }
         ;
     });
     document.addEventListener("input", function (e) {
+        var target = e.target;
         // signup fields
-        if (e.target["attributes"]["id"]["value"] === "signup-username") {
-            signupUsername = e.target["value"];
+        if (target.id === "signup-username") {
+            signupUsername = target.value;
         }
         ;
-        if (e.target["attributes"]["id"]["value"] === "signup-email") {
-            signupEmail = e.target["value"];
+        if (target.id === "signup-email") {
+            signupEmail = target.value;
         }
         ;
-        if (e.target["attributes"]["id"]["value"] === "signup-password") {
-            signupPassword = e.target["value"];
+        if (target.id === "signup-password") {
+            signupPassword = target.value;
         }
         ;
         // login fields
-        if (e.target["attributes"]["id"]["value"] === "login-username") {
-            loginUsername = e.target["value"];
+        if (target.id === "login-username") {
+            loginUsername = target.value;
         }
         ;
-        if (e.target["attributes"]["id"]["value"] === "login-password") {
-            loginPassword = e.target["value"];
+        if (target.id === "login-password") {
+            loginPassword = target.value;
         }
         ;
         // event fields
-        if (e.target["attributes"]["id"]["value"] === "event-name") {
-            eventName = e.target["value"];
+        if (target.id === "event-name") {
+            eventName = target.value;
         }
         ;
-        if (e.target["attributes"]["id"]["value"] === "event-description") {
-            eventDescription = e.target["value"];
+        if (target.id === "event-description") {
+            eventDescription = target.value;
         }
         ;
-        if (e.target["attributes"]["id"]["value"] === "event-date") {
-            eventDate = e.target["value"];
+        if (target.id === "event-date") {
+            eventDate = target.value;
         }
         ;
-        if (e.target["attributes"]["id"]["value"] === "event-time") {
-            eventTime = e.target["value"];
+        if (target.id === "event-time") {
+            eventTime = target.value;
         }
         ;
     });
     document.addEventListener("submit", function (e) {
         e.preventDefault();
-        if (e.target["attributes"]["id"]["value"] === "signup-form") {
+        var target = e.target;
+        if (target.id === "signup-form") {
             signup();
         }
         ;
-        if (e.target["attributes"]["id"]["value"] === "login-form") {
+        if (target.id === "login-form") {
             login();
         }
         ;
-        if (e.target["attributes"]["id"]["value"] === "event-form") {
+        if (target.id === "event-form") {
             createEvent();
         }
         ;
@@ -236,10 +241,17 @@ document.addEventListener("DOMContentLoaded", function (event) {
         })
             .then(function (res) {
             if (res.ok) {
+                feedbackDiv.innerHTML = "";
                 return res.json();
             }
             else {
-                throw new Error();
+                if (res.status === 409) {
+                    throw new Error("sorry, that username is taken");
+                }
+                else {
+                    throw new Error("sorry, something went wrong");
+                }
+                ;
             }
             ;
         })
@@ -247,7 +259,7 @@ document.addEventListener("DOMContentLoaded", function (event) {
             handleToken(jwt, false);
         })["catch"](function (err) {
             feedbackDiv.style.color = "red";
-            feedbackDiv.innerHTML = "sorry, something went wrong";
+            feedbackDiv.innerHTML = err.message;
         });
     };
     var login = function () {
@@ -261,17 +273,27 @@ document.addEventListener("DOMContentLoaded", function (event) {
                 password: loginPassword
             })
         })
-            .then(function (res) { return res.json(); })
+            .then(function (res) {
+            if (res.ok) {
+                feedbackDiv.innerHTML = "";
+                return res.json();
+            }
+            else {
+                throw new Error("sorry, something went wrong");
+            }
+            ;
+        })
             .then(function (jwt) {
             handleToken(jwt, false);
         })["catch"](function (err) {
             feedbackDiv.style.color = "red";
-            feedbackDiv.innerHTML = "sorry, something went wrong";
+            feedbackDiv.innerHTML = err.message;
         });
     };
     var logout = function () {
         chrome.storage.local.remove(["token"]);
         feedbackDiv.innerHTML = "";
+        // user is logged out -- change display
         loginDiv.style.display = "block";
         signupButton.style.display = "block";
         logoutButton.style.display = "none";
@@ -298,10 +320,11 @@ document.addEventListener("DOMContentLoaded", function (event) {
         })
             .then(function (res) {
             if (res.ok) {
+                feedbackDiv.innerHTML = "";
                 return res.json();
             }
             else {
-                throw new Error();
+                throw new Error("sorry, something went wrong");
             }
             ;
         })
@@ -314,10 +337,11 @@ document.addEventListener("DOMContentLoaded", function (event) {
             }, 2000);
         })["catch"](function (err) {
             feedbackDiv.style.color = "red";
-            feedbackDiv.innerHTML = "sorry, something went wrong";
+            feedbackDiv.innerHTML = err.message;
         });
     };
     var getEvents = function (timeframe) {
+        // error handling
         if (!userId) {
             console.log("no userId");
             throw new Error();
@@ -334,10 +358,11 @@ document.addEventListener("DOMContentLoaded", function (event) {
         })
             .then(function (res) {
             if (res.ok) {
+                feedbackDiv.innerHTML = "";
                 return res.json();
             }
             else {
-                throw new Error();
+                throw new Error("sorry, something went wrong");
             }
             ;
         })
@@ -353,7 +378,7 @@ document.addEventListener("DOMContentLoaded", function (event) {
             appendEvents(events);
         })["catch"](function (err) {
             feedbackDiv.style.color = "red";
-            feedbackDiv.innerHTML = "sorry, something went wrong";
+            feedbackDiv.innerHTML = err.message;
         });
     };
 });
