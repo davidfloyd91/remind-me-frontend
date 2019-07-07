@@ -100,104 +100,104 @@ document.addEventListener("DOMContentLoaded", (event) => {
     // if user is logged in
     if (res["token"]) {
       // hide signup and login forms
-      signupDiv["style"]["display"] = "none";
-      signupButton["style"]["display"] = "none";
-      loginButton["style"]["display"] = "none";
-      loginDiv["style"]["display"] = "none";
+      signupDiv.style.display = "none";
+      signupButton.style.display = "none";
+      loginButton.style.display = "none";
+      loginDiv.style.display = "none";
 
       handleToken(res["token"], true); // local is true
     };
   });
 
   document.addEventListener("click", (e) => {
-    if (e["target"]["attributes"]["id"]["value"] === "logout-button") {
+    if (e.target["attributes"]["id"]["value"] === "logout-button") {
       logout();
     };
 
-    if (e["target"]["attributes"]["id"]["value"] === "signup-button") {
-      signupDiv["style"]["display"] = "block";
-      loginButton["style"]["display"] = "block";
-      loginDiv["style"]["display"] = "none";
-      signupButton["style"]["display"] = "none";
+    if (e.target["attributes"]["id"]["value"] === "signup-button") {
+      signupDiv.style.display = "block";
+      loginButton.style.display = "block";
+      loginDiv.style.display = "none";
+      signupButton.style.display = "none";
     };
 
-    if (e["target"]["attributes"]["id"]["value"] === "login-button") {
-      signupDiv["style"]["display"] = "none";
-      loginButton["style"]["display"] = "none";
-      loginDiv["style"]["display"] = "block";
-      signupButton["style"]["display"] = "block";
+    if (e.target["attributes"]["id"]["value"] === "login-button") {
+      signupDiv.style.display = "none";
+      loginButton.style.display = "none";
+      loginDiv.style.display = "block";
+      signupButton.style.display = "block";
     };
 
-    if (e["target"]["attributes"]["id"]["value"] === "today") {
+    if (e.target["attributes"]["id"]["value"] === "today") {
       getEvents("/today");
     };
 
-    if (e["target"]["attributes"]["id"]["value"] === "tomorrow") {
+    if (e.target["attributes"]["id"]["value"] === "tomorrow") {
       getEvents("/tomorrow");
     };
 
-    if (e["target"]["attributes"]["id"]["value"] === "week") {
+    if (e.target["attributes"]["id"]["value"] === "week") {
       getEvents("/week");
     };
 
-    if (e["target"]["attributes"]["id"]["value"] === "all") {
+    if (e.target["attributes"]["id"]["value"] === "all") {
       getEvents("");
     };
   });
 
   document.addEventListener("input", (e) => {
     // signup fields
-    if (e["target"]["attributes"]["id"]["value"] === "signup-username") {
-      signupUsername = e["target"]["value"];
+    if (e.target["attributes"]["id"]["value"] === "signup-username") {
+      signupUsername = e.target["value"];
     };
 
-    if (e["target"]["attributes"]["id"]["value"] === "signup-email") {
-      signupEmail = e["target"]["value"];
+    if (e.target["attributes"]["id"]["value"] === "signup-email") {
+      signupEmail = e.target["value"];
     };
 
-    if (e["target"]["attributes"]["id"]["value"] === "signup-password") {
-      signupPassword = e["target"]["value"];
+    if (e.target["attributes"]["id"]["value"] === "signup-password") {
+      signupPassword = e.target["value"];
     };
 
     // login fields
-    if (e["target"]["attributes"]["id"]["value"] === "login-username") {
-      loginUsername = e["target"]["value"];
+    if (e.target["attributes"]["id"]["value"] === "login-username") {
+      loginUsername = e.target["value"];
     };
 
-    if (e["target"]["attributes"]["id"]["value"] === "login-password") {
-      loginPassword = e["target"]["value"];
+    if (e.target["attributes"]["id"]["value"] === "login-password") {
+      loginPassword = e.target["value"];
     };
 
     // event fields
-    if (e["target"]["attributes"]["id"]["value"] === "event-name") {
-      eventName = e["target"]["value"];
+    if (e.target["attributes"]["id"]["value"] === "event-name") {
+      eventName = e.target["value"];
     };
 
-    if (e["target"]["attributes"]["id"]["value"] === "event-description") {
-      eventDescription = e["target"]["value"];
+    if (e.target["attributes"]["id"]["value"] === "event-description") {
+      eventDescription = e.target["value"];
     };
 
-    if (e["target"]["attributes"]["id"]["value"] === "event-date") {
-      eventDate = e["target"]["value"];
+    if (e.target["attributes"]["id"]["value"] === "event-date") {
+      eventDate = e.target["value"];
     };
 
-    if (e["target"]["attributes"]["id"]["value"] === "event-time") {
-      eventTime = e["target"]["value"];
+    if (e.target["attributes"]["id"]["value"] === "event-time") {
+      eventTime = e.target["value"];
     };
   });
 
   document.addEventListener("submit", (e) => {
     e.preventDefault();
 
-    if (e["target"]["attributes"]["id"]["value"] === "signup-form") {
+    if (e.target["attributes"]["id"]["value"] === "signup-form") {
       signup();
     };
 
-    if (e["target"]["attributes"]["id"]["value"] === "login-form") {
+    if (e.target["attributes"]["id"]["value"] === "login-form") {
       login();
     };
 
-    if (e["target"]["attributes"]["id"]["value"] === "event-form") {
+    if (e.target["attributes"]["id"]["value"] === "event-form") {
       createEvent();
     };
   });
@@ -225,13 +225,13 @@ document.addEventListener("DOMContentLoaded", (event) => {
     };
 
     // user is logged in -- change display
-    eventDiv["style"]["display"] = "block";
-    loggedInDiv["style"]["display"] = "block";
-    logoutButton["style"]["display"] = "block";
-    loginButton["style"]["display"] = "none";
-    signupButton["style"]["display"] = "none";
-    loginDiv["style"]["display"] = "none";
-    signupDiv["style"]["display"] = "none";
+    eventDiv.style.display = "block";
+    loggedInDiv.style.display = "block";
+    logoutButton.style.display = "block";
+    loginButton.style.display = "none";
+    signupButton.style.display = "none";
+    loginDiv.style.display = "none";
+    signupDiv.style.display = "none";
 
     signupForm.reset();
     loginForm.reset();
@@ -302,13 +302,13 @@ document.addEventListener("DOMContentLoaded", (event) => {
   const logout = () => {
     chrome.storage.local.remove(["token"]);
 
-    loginDiv["style"]["display"] = "block";
-    signupButton["style"]["display"] = "block";
-    logoutButton["style"]["display"] = "none";
-    loginButton["style"]["display"] = "none";
-    loggedInDiv["style"]["display"] = "none";
-    signupDiv["style"]["display"] = "none";
-    eventDiv["style"]["display"] = "none";
+    loginDiv.style.display = "block";
+    signupButton.style.display = "block";
+    logoutButton.style.display = "none";
+    loginButton.style.display = "none";
+    loggedInDiv.style.display = "none";
+    signupDiv.style.display = "none";
+    eventDiv.style.display = "none";
   };
 
   const createEvent= () => {
