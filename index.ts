@@ -292,7 +292,7 @@ document.addEventListener("DOMContentLoaded", (event) => {
         return res.json();
       } else {
         if (res.status === 409) {
-          throw new Error("Sorry, that username is taken");
+          throw new Error("Sorry, that username is taken!");
         } else {
           throw new Error(sorry);
         };
@@ -356,7 +356,7 @@ document.addEventListener("DOMContentLoaded", (event) => {
 
     try {
       if (!eventTime) {
-        throw new Error("please specify a time");
+        throw new Error("Please specify a time!");
       };
     }
     catch(err) {

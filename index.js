@@ -248,7 +248,7 @@ document.addEventListener("DOMContentLoaded", function (event) {
             }
             else {
                 if (res.status === 409) {
-                    throw new Error("Sorry, that username is taken");
+                    throw new Error("Sorry, that username is taken!");
                 }
                 else {
                     throw new Error(sorry);
@@ -309,7 +309,7 @@ document.addEventListener("DOMContentLoaded", function (event) {
         var eventDateTime = eventDate + "T" + eventTime + ":00-04:00";
         try {
             if (!eventTime) {
-                throw new Error("please specify a time");
+                throw new Error("Please specify a time!");
             }
             ;
         }
