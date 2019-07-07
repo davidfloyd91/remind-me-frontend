@@ -90,10 +90,25 @@ document.addEventListener("DOMContentLoaded", (event) => {
   const loginButton = <HTMLButtonElement>document.querySelector("#login-button");
   const loginForm = <HTMLFormElement>document.querySelector("#login-form");
   const eventForm = <HTMLFormElement>document.querySelector("#event-form");
+  const eventDateInput = <HTMLInputElement>document.querySelector("#event-date");
   const signupForm = <HTMLFormElement>document.querySelector("#signup-form");
   const loggedInDiv = <HTMLDivElement>document.querySelector("#logged-in");
   const feedbackDiv = <HTMLDivElement>document.querySelector("#feedback");
   const eventsContainer = <HTMLDivElement>document.querySelector("#events-container");
+
+  // don't let user pick a date in the past
+  const today = new Date();
+  let month = String(today.getMonth() + 1);
+  if (month.length === 1) {
+    month = "0" + month;
+  };
+  let date = String(today.getDate());
+  if (date.length === 1) {
+    date = "0" + date;
+  };
+  const minDate = today.getFullYear() + "-" + month + "-" + date;
+  // console.log(minDate)
+  eventDateInput.min = minDate
 
   // get token from local storage
   chrome.storage.local.get(["token"], (res) => {
@@ -273,7 +288,6 @@ document.addEventListener("DOMContentLoaded", (event) => {
     .catch((err) => {
       feedbackDiv.style.color = "red";
       feedbackDiv.innerHTML = "sorry, something went wrong";
-      feedbackDiv.style.color = "black";
     });
   };
 
@@ -295,12 +309,13 @@ document.addEventListener("DOMContentLoaded", (event) => {
     .catch((err) => {
       feedbackDiv.style.color = "red";
       feedbackDiv.innerHTML = "sorry, something went wrong";
-      feedbackDiv.style.color = "black";
     });
   };
 
   const logout = () => {
     chrome.storage.local.remove(["token"]);
+
+    feedbackDiv.innerHTML = ""; 
 
     loginDiv.style.display = "block";
     signupButton.style.display = "block";
@@ -339,6 +354,7 @@ document.addEventListener("DOMContentLoaded", (event) => {
       eventForm.reset();
       feedbackDiv.style.color = "blue";
       feedbackDiv.innerHTML = "saved!";
+
       setTimeout(() => {
         feedbackDiv.innerHTML = "";
       }, 2000);
@@ -346,21 +362,16 @@ document.addEventListener("DOMContentLoaded", (event) => {
     .catch((err) => {
       feedbackDiv.style.color = "red";
       feedbackDiv.innerHTML = "sorry, something went wrong";
-      feedbackDiv.style.color = "black";
     });
   };
 
   const getEvents = (timeframe: string) => {
-    // turn into real error handling
     if (!userId) {
-      feedbackDiv.innerHTML = "no user id";
-      return
-    };
-
-    // turn into real error handling
-    if (!rawToken) {
-      feedbackDiv.innerHTML = "no rawToken";
-      return
+      console.log("no userId");
+      throw new Error();
+    } else if (!rawToken) {
+      console.log("no rawToken");
+      throw new Error();
     };
 
     fetch(url + "/users/" + userId + "/events" + timeframe, {
@@ -388,7 +399,6 @@ document.addEventListener("DOMContentLoaded", (event) => {
     .catch((err) => {
       feedbackDiv.style.color = "red";
       feedbackDiv.innerHTML = "sorry, something went wrong";
-      feedbackDiv.style.color = "black";
     });
   };
 });

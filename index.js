@@ -63,10 +63,26 @@ document.addEventListener("DOMContentLoaded", function (event) {
     var loginButton = document.querySelector("#login-button");
     var loginForm = document.querySelector("#login-form");
     var eventForm = document.querySelector("#event-form");
+    var eventDateInput = document.querySelector("#event-date");
     var signupForm = document.querySelector("#signup-form");
     var loggedInDiv = document.querySelector("#logged-in");
     var feedbackDiv = document.querySelector("#feedback");
     var eventsContainer = document.querySelector("#events-container");
+    // don't let user pick a date in the past
+    var today = new Date();
+    var month = String(today.getMonth() + 1);
+    if (month.length === 1) {
+        month = "0" + month;
+    }
+    ;
+    var date = String(today.getDate());
+    if (date.length === 1) {
+        date = "0" + date;
+    }
+    ;
+    var minDate = today.getFullYear() + "-" + month + "-" + date;
+    // console.log(minDate)
+    eventDateInput.min = minDate;
     // get token from local storage
     chrome.storage.local.get(["token"], function (res) {
         // if user is logged in
@@ -232,7 +248,6 @@ document.addEventListener("DOMContentLoaded", function (event) {
         })["catch"](function (err) {
             feedbackDiv.style.color = "red";
             feedbackDiv.innerHTML = "sorry, something went wrong";
-            feedbackDiv.style.color = "black";
         });
     };
     var login = function () {
@@ -252,11 +267,11 @@ document.addEventListener("DOMContentLoaded", function (event) {
         })["catch"](function (err) {
             feedbackDiv.style.color = "red";
             feedbackDiv.innerHTML = "sorry, something went wrong";
-            feedbackDiv.style.color = "black";
         });
     };
     var logout = function () {
         chrome.storage.local.remove(["token"]);
+        feedbackDiv.innerHTML = "";
         loginDiv.style.display = "block";
         signupButton.style.display = "block";
         logoutButton.style.display = "none";
@@ -300,20 +315,16 @@ document.addEventListener("DOMContentLoaded", function (event) {
         })["catch"](function (err) {
             feedbackDiv.style.color = "red";
             feedbackDiv.innerHTML = "sorry, something went wrong";
-            feedbackDiv.style.color = "black";
         });
     };
     var getEvents = function (timeframe) {
-        // turn into real error handling
         if (!userId) {
-            feedbackDiv.innerHTML = "no user id";
-            return;
+            console.log("no userId");
+            throw new Error();
         }
-        ;
-        // turn into real error handling
-        if (!rawToken) {
-            feedbackDiv.innerHTML = "no rawToken";
-            return;
+        else if (!rawToken) {
+            console.log("no rawToken");
+            throw new Error();
         }
         ;
         fetch(url + "/users/" + userId + "/events" + timeframe, {
@@ -343,7 +354,6 @@ document.addEventListener("DOMContentLoaded", function (event) {
         })["catch"](function (err) {
             feedbackDiv.style.color = "red";
             feedbackDiv.innerHTML = "sorry, something went wrong";
-            feedbackDiv.style.color = "black";
         });
     };
 });
