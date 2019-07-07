@@ -260,9 +260,20 @@ document.addEventListener("DOMContentLoaded", (event) => {
         password: signupPassword
       })
     })
-    .then(res => res.json())
+    .then((res) => {
+      if (res.ok) {
+        return res.json();
+      } else {
+        throw new Error();
+      };
+    })
     .then(jwt => {
       handleToken(jwt, false);
+    })
+    .catch((err) => {
+      feedbackDiv.style.color = "red";
+      feedbackDiv.innerHTML = "sorry, something went wrong";
+      feedbackDiv.style.color = "black";
     });
   };
 
@@ -277,9 +288,14 @@ document.addEventListener("DOMContentLoaded", (event) => {
         password: loginPassword
       })
     })
-    .then(res => res.json())
-    .then(jwt => {
+    .then((res) => res.json())
+    .then((jwt) => {
       handleToken(jwt, false);
+    })
+    .catch((err) => {
+      feedbackDiv.style.color = "red";
+      feedbackDiv.innerHTML = "sorry, something went wrong";
+      feedbackDiv.style.color = "black";
     });
   };
 
@@ -312,19 +328,25 @@ document.addEventListener("DOMContentLoaded", (event) => {
         user_id: userId
       })
     })
-    .then(res => {
+    .then((res) => {
       if (res.ok) {
         return res.json();
       } else {
-        feedbackDiv.innerHTML = JSON.stringify(res);
+        throw new Error();
       };
     })
-    .then(json => {
+    .then((json) => {
       eventForm.reset();
+      feedbackDiv.style.color = "blue";
       feedbackDiv.innerHTML = "saved!";
       setTimeout(() => {
         feedbackDiv.innerHTML = "";
       }, 2000);
+    })
+    .catch((err) => {
+      feedbackDiv.style.color = "red";
+      feedbackDiv.innerHTML = "sorry, something went wrong";
+      feedbackDiv.style.color = "black";
     });
   };
 
@@ -346,7 +368,13 @@ document.addEventListener("DOMContentLoaded", (event) => {
         "Token": rawToken.token,
       },
     })
-    .then(res => res.json())
+    .then((res) => {
+      if (res.ok) {
+        return res.json();
+      } else {
+        throw new Error();
+      };
+    })
     .then(eventsArr => {
       // clear events only if response is parsed
       events = [];
@@ -356,6 +384,11 @@ document.addEventListener("DOMContentLoaded", (event) => {
     })
     .then(() => {
       appendEvents(events);
+    })
+    .catch((err) => {
+      feedbackDiv.style.color = "red";
+      feedbackDiv.innerHTML = "sorry, something went wrong";
+      feedbackDiv.style.color = "black";
     });
   };
 });

@@ -218,9 +218,21 @@ document.addEventListener("DOMContentLoaded", function (event) {
                 password: signupPassword
             })
         })
-            .then(function (res) { return res.json(); })
+            .then(function (res) {
+            if (res.ok) {
+                return res.json();
+            }
+            else {
+                throw new Error();
+            }
+            ;
+        })
             .then(function (jwt) {
             handleToken(jwt, false);
+        })["catch"](function (err) {
+            feedbackDiv.style.color = "red";
+            feedbackDiv.innerHTML = "sorry, something went wrong";
+            feedbackDiv.style.color = "black";
         });
     };
     var login = function () {
@@ -237,6 +249,10 @@ document.addEventListener("DOMContentLoaded", function (event) {
             .then(function (res) { return res.json(); })
             .then(function (jwt) {
             handleToken(jwt, false);
+        })["catch"](function (err) {
+            feedbackDiv.style.color = "red";
+            feedbackDiv.innerHTML = "sorry, something went wrong";
+            feedbackDiv.style.color = "black";
         });
     };
     var logout = function () {
@@ -270,17 +286,21 @@ document.addEventListener("DOMContentLoaded", function (event) {
                 return res.json();
             }
             else {
-                feedbackDiv.innerHTML = JSON.stringify(res);
+                throw new Error();
             }
             ;
         })
-            // it just said saved when it wasn't fixfixfix
             .then(function (json) {
             eventForm.reset();
+            feedbackDiv.style.color = "blue";
             feedbackDiv.innerHTML = "saved!";
             setTimeout(function () {
                 feedbackDiv.innerHTML = "";
             }, 2000);
+        })["catch"](function (err) {
+            feedbackDiv.style.color = "red";
+            feedbackDiv.innerHTML = "sorry, something went wrong";
+            feedbackDiv.style.color = "black";
         });
     };
     var getEvents = function (timeframe) {
@@ -301,7 +321,15 @@ document.addEventListener("DOMContentLoaded", function (event) {
                 "Token": rawToken.token
             }
         })
-            .then(function (res) { return res.json(); })
+            .then(function (res) {
+            if (res.ok) {
+                return res.json();
+            }
+            else {
+                throw new Error();
+            }
+            ;
+        })
             .then(function (eventsArr) {
             // clear events only if response is parsed
             events = [];
@@ -312,6 +340,10 @@ document.addEventListener("DOMContentLoaded", function (event) {
         })
             .then(function () {
             appendEvents(events);
+        })["catch"](function (err) {
+            feedbackDiv.style.color = "red";
+            feedbackDiv.innerHTML = "sorry, something went wrong";
+            feedbackDiv.style.color = "black";
         });
     };
 });
