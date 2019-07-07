@@ -57,6 +57,8 @@ var eventTime;
 // current date values
 var month;
 var date;
+// generic error message
+var sorry = "Sorry, something went wrong!";
 document.addEventListener("DOMContentLoaded", function (event) {
     var signupDiv = document.querySelector("#signup-div");
     var loginDiv = document.querySelector("#login-div");
@@ -246,10 +248,10 @@ document.addEventListener("DOMContentLoaded", function (event) {
             }
             else {
                 if (res.status === 409) {
-                    throw new Error("sorry, that username is taken");
+                    throw new Error("Sorry, that username is taken");
                 }
                 else {
-                    throw new Error("sorry, something went wrong");
+                    throw new Error(sorry);
                 }
                 ;
             }
@@ -279,7 +281,7 @@ document.addEventListener("DOMContentLoaded", function (event) {
                 return res.json();
             }
             else {
-                throw new Error("sorry, something went wrong");
+                throw new Error(sorry);
             }
             ;
         })
@@ -305,6 +307,18 @@ document.addEventListener("DOMContentLoaded", function (event) {
     var createEvent = function () {
         // timezone is hardcoded don't keep it that way
         var eventDateTime = eventDate + "T" + eventTime + ":00-04:00";
+        try {
+            if (!eventTime) {
+                throw new Error("please specify a time");
+            }
+            ;
+        }
+        catch (err) {
+            feedbackDiv.style.color = "red";
+            feedbackDiv.innerHTML = err;
+            return;
+        }
+        ;
         fetch(url + "/events", {
             method: "POST",
             headers: {
@@ -324,7 +338,7 @@ document.addEventListener("DOMContentLoaded", function (event) {
                 return res.json();
             }
             else {
-                throw new Error("sorry, something went wrong");
+                throw new Error(sorry);
             }
             ;
         })
@@ -341,14 +355,18 @@ document.addEventListener("DOMContentLoaded", function (event) {
         });
     };
     var getEvents = function (timeframe) {
-        // error handling
-        if (!userId) {
-            console.log("no userId");
-            throw new Error();
+        // is this try-catch block necessary? won't it fail in the fetch? is logging out the best way to handle?
+        try {
+            if (!userId || !rawToken) {
+                throw new Error(sorry);
+            }
+            ;
         }
-        else if (!rawToken) {
-            console.log("no rawToken");
-            throw new Error();
+        catch (err) {
+            logout();
+            feedbackDiv.style.color = "red";
+            feedbackDiv.innerHTML = err.message;
+            return;
         }
         ;
         fetch(url + "/users/" + userId + "/events" + timeframe, {
@@ -362,7 +380,7 @@ document.addEventListener("DOMContentLoaded", function (event) {
                 return res.json();
             }
             else {
-                throw new Error("sorry, something went wrong");
+                throw new Error(sorry);
             }
             ;
         })
