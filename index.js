@@ -62,8 +62,10 @@ document.addEventListener("DOMContentLoaded", function (event) {
     var signupButton = document.querySelector("#signup-button");
     var loginButton = document.querySelector("#login-button");
     var loginForm = document.querySelector("#login-form");
+    var eventForm = document.querySelector("#event-form");
     var signupForm = document.querySelector("#signup-form");
     var loggedInDiv = document.querySelector("#logged-in");
+    var feedbackDiv = document.querySelector("#feedback");
     var eventsContainer = document.querySelector("#events-container");
     // get token from local storage
     chrome.storage.local.get(["token"], function (res) {
@@ -263,19 +265,34 @@ document.addEventListener("DOMContentLoaded", function (event) {
                 user_id: userId
             })
         })
-            .then(function (res) { return res.json(); })
-            .then(console.log);
+            .then(function (res) {
+            if (res.ok) {
+                return res.json();
+            }
+            else {
+                feedbackDiv.innerHTML = JSON.stringify(res);
+            }
+            ;
+        })
+            // it just said saved when it wasn't fixfixfix
+            .then(function (json) {
+            eventForm.reset();
+            feedbackDiv.innerHTML = "saved!";
+            setTimeout(function () {
+                feedbackDiv.innerHTML = "";
+            }, 2000);
+        });
     };
     var getEvents = function (timeframe) {
         // turn into real error handling
         if (!userId) {
-            console.log("no userId");
+            feedbackDiv.innerHTML = "no user id";
             return;
         }
         ;
         // turn into real error handling
         if (!rawToken) {
-            console.log("no rawToken");
+            feedbackDiv.innerHTML = "no rawToken";
             return;
         }
         ;

@@ -89,8 +89,10 @@ document.addEventListener("DOMContentLoaded", (event) => {
   const signupButton = <HTMLButtonElement>document.querySelector("#signup-button");
   const loginButton = <HTMLButtonElement>document.querySelector("#login-button");
   const loginForm = <HTMLFormElement>document.querySelector("#login-form");
+  const eventForm = <HTMLFormElement>document.querySelector("#event-form");
   const signupForm = <HTMLFormElement>document.querySelector("#signup-form");
   const loggedInDiv = <HTMLDivElement>document.querySelector("#logged-in");
+  const feedbackDiv = <HTMLDivElement>document.querySelector("#feedback");
   const eventsContainer = <HTMLDivElement>document.querySelector("#events-container");
 
   // get token from local storage
@@ -310,20 +312,32 @@ document.addEventListener("DOMContentLoaded", (event) => {
         user_id: userId
       })
     })
-    .then(res => res.json())
-    .then(console.log)
+    .then(res => {
+      if (res.ok) {
+        return res.json();
+      } else {
+        feedbackDiv.innerHTML = JSON.stringify(res);
+      };
+    })
+    .then(json => {
+      eventForm.reset();
+      feedbackDiv.innerHTML = "saved!";
+      setTimeout(() => {
+        feedbackDiv.innerHTML = "";
+      }, 2000);
+    });
   };
 
   const getEvents = (timeframe: string) => {
     // turn into real error handling
     if (!userId) {
-      console.log("no userId");
+      feedbackDiv.innerHTML = "no user id";
       return
     };
 
     // turn into real error handling
     if (!rawToken) {
-      console.log("no rawToken");
+      feedbackDiv.innerHTML = "no rawToken";
       return
     };
 
