@@ -70,6 +70,7 @@ let events: ScheduledEvent[] = [];
 let signupUsername: string;
 let signupEmail: string;
 let signupPassword: string;
+let signupPasswordConf: string;
 
 // login form values
 let loginUsername: string;
@@ -184,6 +185,10 @@ document.addEventListener("DOMContentLoaded", (event) => {
       signupPassword = target.value;
     };
 
+    if (target.id === "signup-password-conf") {
+      signupPasswordConf = target.value;
+    };
+
     // login fields
     if (target.id === "login-username") {
       loginUsername = target.value;
@@ -275,6 +280,17 @@ document.addEventListener("DOMContentLoaded", (event) => {
   };
 
   const signup = () => {
+    try {
+      if (signupPassword !== signupPasswordConf) {
+        throw new Error("Sorry, passwords don't match!");
+      };
+    }
+    catch(err) {
+      feedbackDiv.style.color = "red";
+      feedbackDiv.innerHTML = err.message;
+      return
+    };
+
     fetch(url + "/signup", {
       method: "POST",
       headers: {
@@ -361,7 +377,7 @@ document.addEventListener("DOMContentLoaded", (event) => {
     }
     catch(err) {
       feedbackDiv.style.color = "red";
-      feedbackDiv.innerHTML = err;
+      feedbackDiv.innerHTML = err.message;
       return
     };
 
