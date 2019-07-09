@@ -378,8 +378,10 @@ document.addEventListener("DOMContentLoaded", function (event) {
         userId = 0;
         rawToken.token = "";
         chrome.storage.local.remove(["token"]);
+        events = [];
         feedbackDiv.innerHTML = "";
         // user is logged out -- change display
+        eventsContainer.innerHTML = "";
         loginDiv.style.display = "block";
         logoutButton.style.display = "none";
         loggedInDiv.style.display = "none";
