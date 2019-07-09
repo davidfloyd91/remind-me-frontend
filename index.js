@@ -65,8 +65,7 @@ document.addEventListener("DOMContentLoaded", function (event) {
     var loginDiv = document.querySelector("#login-div");
     var eventDiv = document.querySelector("#event-div");
     var logoutButton = document.querySelector("#logout-button");
-    var signupButton = document.querySelector("#signup-button");
-    var loginButton = document.querySelector("#login-button");
+    var createEventButton = document.querySelector("#create-event-button");
     var loginForm = document.querySelector("#login-form");
     var eventForm = document.querySelector("#event-form");
     var eventDateInput = document.querySelector("#event-date");
@@ -94,8 +93,6 @@ document.addEventListener("DOMContentLoaded", function (event) {
         if (res["token"]) {
             // hide signup and login forms
             signupDiv.style.display = "none";
-            signupButton.style.display = "none";
-            loginButton.style.display = "none";
             loginDiv.style.display = "none";
             handleToken(res["token"], true); // local is true
         }
@@ -109,16 +106,12 @@ document.addEventListener("DOMContentLoaded", function (event) {
         ;
         if (target.id === "signup-button") {
             signupDiv.style.display = "block";
-            loginButton.style.display = "block";
             loginDiv.style.display = "none";
-            signupButton.style.display = "none";
         }
         ;
         if (target.id === "login-button") {
             signupDiv.style.display = "none";
-            loginButton.style.display = "none";
             loginDiv.style.display = "block";
-            signupButton.style.display = "block";
         }
         ;
         if (target.id === "today") {
@@ -216,11 +209,8 @@ document.addEventListener("DOMContentLoaded", function (event) {
         }
         ;
         // user is logged in -- change display
-        eventDiv.style.display = "block";
         loggedInDiv.style.display = "block";
         logoutButton.style.display = "block";
-        loginButton.style.display = "none";
-        signupButton.style.display = "none";
         loginDiv.style.display = "none";
         signupDiv.style.display = "none";
         signupForm.reset();
@@ -276,6 +266,7 @@ document.addEventListener("DOMContentLoaded", function (event) {
         })
             .then(function (jwt) {
             handleToken(jwt, false);
+            eventDiv.style.display = "block";
         })["catch"](function (err) {
             feedbackDiv.style.color = "red";
             feedbackDiv.innerHTML = err.message;
@@ -314,9 +305,7 @@ document.addEventListener("DOMContentLoaded", function (event) {
         feedbackDiv.innerHTML = "";
         // user is logged out -- change display
         loginDiv.style.display = "block";
-        signupButton.style.display = "block";
         logoutButton.style.display = "none";
-        loginButton.style.display = "none";
         loggedInDiv.style.display = "none";
         signupDiv.style.display = "none";
         eventDiv.style.display = "none";

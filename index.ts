@@ -94,8 +94,7 @@ document.addEventListener("DOMContentLoaded", (event) => {
   const loginDiv = <HTMLDivElement>document.querySelector("#login-div");
   const eventDiv = <HTMLDivElement>document.querySelector("#event-div");
   const logoutButton = <HTMLButtonElement>document.querySelector("#logout-button");
-  const signupButton = <HTMLButtonElement>document.querySelector("#signup-button");
-  const loginButton = <HTMLButtonElement>document.querySelector("#login-button");
+  const createEventButton = <HTMLButtonElement>document.querySelector("#create-event-button");
   const loginForm = <HTMLFormElement>document.querySelector("#login-form");
   const eventForm = <HTMLFormElement>document.querySelector("#event-form");
   const eventDateInput = <HTMLInputElement>document.querySelector("#event-date");
@@ -123,8 +122,6 @@ document.addEventListener("DOMContentLoaded", (event) => {
     if (res["token"]) {
       // hide signup and login forms
       signupDiv.style.display = "none";
-      signupButton.style.display = "none";
-      loginButton.style.display = "none";
       loginDiv.style.display = "none";
 
       handleToken(res["token"], true); // local is true
@@ -140,16 +137,12 @@ document.addEventListener("DOMContentLoaded", (event) => {
 
     if (target.id === "signup-button") {
       signupDiv.style.display = "block";
-      loginButton.style.display = "block";
       loginDiv.style.display = "none";
-      signupButton.style.display = "none";
     };
 
     if (target.id === "login-button") {
       signupDiv.style.display = "none";
-      loginButton.style.display = "none";
       loginDiv.style.display = "block";
-      signupButton.style.display = "block";
     };
 
     if (target.id === "today") {
@@ -256,11 +249,8 @@ document.addEventListener("DOMContentLoaded", (event) => {
     };
 
     // user is logged in -- change display
-    eventDiv.style.display = "block";
     loggedInDiv.style.display = "block";
     logoutButton.style.display = "block";
-    loginButton.style.display = "none";
-    signupButton.style.display = "none";
     loginDiv.style.display = "none";
     signupDiv.style.display = "none";
 
@@ -316,6 +306,7 @@ document.addEventListener("DOMContentLoaded", (event) => {
     })
     .then(jwt => {
       handleToken(jwt, false);
+      eventDiv.style.display = "block";
     })
     .catch((err) => {
       feedbackDiv.style.color = "red";
@@ -358,9 +349,7 @@ document.addEventListener("DOMContentLoaded", (event) => {
 
     // user is logged out -- change display
     loginDiv.style.display = "block";
-    signupButton.style.display = "block";
     logoutButton.style.display = "none";
-    loginButton.style.display = "none";
     loggedInDiv.style.display = "none";
     signupDiv.style.display = "none";
     eventDiv.style.display = "none";

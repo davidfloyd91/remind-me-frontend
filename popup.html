@@ -4,13 +4,15 @@
     <meta charset="utf-8">
     <title></title>
     <script src="./index.js"></script>
+    <link rel="stylesheet" type="text/css" href="main.css">
   </head>
   <body>
+    <h2>Remind Me</h2>
     <button id="logout-button" style="display:none;">Log out</button>
-    <button id="signup-button" style="display:block;">Signup</button>
-    <button id="login-button" style="display:none;">Log in</button>
+    <button id="create-event-button" style="display:none;">New event</button>
     <div id="signup-div" style="display:none;">
       <h3>Sign up</h3>
+      <button id="login-button">Log in</button>
       <form id="signup-form">
         <label for="signup-username">Username</label>
         <input type="text" id="signup-username"></input>
@@ -22,12 +24,13 @@
         <input type="password" id="signup-password-conf"></input>
         <br/>
         <br/>
-        <button type="submit" id="signup-submit">Go</button>
+        <button type="submit" id="signup-submit">Submit</button>
       </form>
       <br/>
     </div>
     <div id="login-div" style="display:block;">
       <h3>Log in</h3>
+      <button id="signup-button">Signup</button>
       <form id="login-form">
         <label for="login-username">Username</label>
         <input type="text" id="login-username"></input>
@@ -35,7 +38,7 @@
         <input type="password" id="login-password"></input>
         <br/>
         <br/>
-        <button type="submit" id="login-submit">Go</button>
+        <button type="submit" id="login-submit">Submit</button>
       </form>
       <br/>
     </div>
@@ -45,13 +48,13 @@
         <label for="event-name">Name</label>
         <input type="text" id="event-name"></input>
         <label for="event-description">Description</label>
-        <input type="text" id="event-description"></input>
+        <textarea id="event-description"></textarea>
         <label for="event-date">Date</label>
         <input type="date" id="event-date"></input>
         <br/>
         <label for="event-time">Time</label>
         <input type="time" id="event-time"></input>
-        <button type="submit" id="event-submit">Go</button>
+        <button type="submit" id="event-submit">Submit</button>
       </form>
       <br/>
     </div>
@@ -59,15 +62,10 @@
       <!-- errors or success messages go here -->
     </div>
     <div id="logged-in" style="display:none;">
-      <div id="get-events-div">
         <button id="today">Today</button>
-        <br/>
         <button id="tomorrow">Tomorrow</button>
-        <br/>
         <button id="week">This Week</button>
-        <br/>
         <button id="all">All</button>
-      </div>
       <div id="events-container">
         <!-- populated with events: ScheduledEvent[] -->
       </div>
