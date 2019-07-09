@@ -66,6 +66,7 @@ document.addEventListener("DOMContentLoaded", function (event) {
     var eventDiv = document.querySelector("#event-div");
     var logoutButton = document.querySelector("#logout-button");
     var createEventButton = document.querySelector("#create-event-button");
+    var hideEventButton = document.querySelector("#hide-event-button");
     var loginForm = document.querySelector("#login-form");
     var eventForm = document.querySelector("#event-form");
     var eventDateInput = document.querySelector("#event-date");
@@ -92,7 +93,7 @@ document.addEventListener("DOMContentLoaded", function (event) {
             "button": (function () { return document.querySelector("#all"); })()
         }
     };
-    // don't let user pick a date in the past
+    // prevents user from picking a date in the past
     var today = new Date();
     month = String(today.getMonth() + 1);
     if (month.length === 1) {
@@ -137,6 +138,14 @@ document.addEventListener("DOMContentLoaded", function (event) {
         ;
         if (target.id === "create-event-button") {
             eventDiv.style.display = "block";
+            createEventButton.style.display = "none";
+            hideEventButton.style.display = "block";
+        }
+        ;
+        if (target.id === "hide-event-button") {
+            eventDiv.style.display = "none";
+            createEventButton.style.display = "block";
+            hideEventButton.style.display = "none";
         }
         ;
         if (target.id === "today") {
@@ -220,21 +229,24 @@ document.addEventListener("DOMContentLoaded", function (event) {
     });
     var appendEvents = function (events, timeframe) {
         eventsContainer.innerHTML = "<h3>" + timeframeVals[timeframe]["header"] + "</h3>";
+        if (events.length === 0) {
+            eventsContainer.innerHTML += "\n      <div class=\"event-container\" style=\"color:#27acc6;\">\n        Nothing here!\n      </div>\n      ";
+        }
+        ;
         // events aren't in chronological order -- sort of an issue
         events.forEach(function (evt) {
             eventsContainer.innerHTML += "\n        <div class=\"event-container\">\n          <div class=\"event-name\">" + evt.name + "</div>\n          <div class=\"event-description\">" + evt.description + "</div>\n          <div class=\"event-scheduled\">" + evt.scheduled + "</div>\n        </div>\n      ";
         });
         var timeframeValsKeys = Object.keys(timeframeVals);
-        console.log(timeframeValsKeys);
         var timeframeButtons = timeframeValsKeys.map(function (a) { return timeframeVals[a]["button"]; });
         timeframeValsKeys.forEach(function (key) {
-            console.log(key);
             if (timeframeVals[key]["button"] === timeframeVals[timeframe]["button"]) {
-                timeframeVals[key]["button"].style.display = "none";
+                timeframeVals[key]["button"].disabled = true;
+                timeframeVals[key]["button"].classList.add("unclickable");
             }
             else {
-                // hereherehereherehere change this to something that makes more sense
-                timeframeVals[key]["button"].style.display = "inline";
+                timeframeVals[key]["button"].disabled = false;
+                timeframeVals[key]["button"].classList.remove("unclickable");
             }
             ;
         });
@@ -242,11 +254,16 @@ document.addEventListener("DOMContentLoaded", function (event) {
     // local is false by default -- true only if token is fetched from Chrome local storage
     var handleToken = function (jwt, local) {
         if (local === void 0) { local = false; }
+        // token was sent from backend
         if (!local) {
             // set to local storage before initializing as RawToken so format matches fetch response
             chrome.storage.local.remove(["token"], function () {
                 chrome.storage.local.set({ token: jwt });
             });
+            // token was fetched locally
+        }
+        else {
+            createEventButton.style.display = "block";
         }
         ;
         // user is logged in -- change display
@@ -273,7 +290,7 @@ document.addEventListener("DOMContentLoaded", function (event) {
             ;
         }
         catch (err) {
-            feedbackDiv.style.color = "red";
+            feedbackDiv.style.color = "#ad2e3f";
             feedbackDiv.innerHTML = err.message;
             return;
         }
@@ -306,10 +323,11 @@ document.addEventListener("DOMContentLoaded", function (event) {
             ;
         })
             .then(function (jwt) {
+            hideEventButton.style.display = "block";
             eventDiv.style.display = "block";
             handleToken(jwt, false);
         })["catch"](function (err) {
-            feedbackDiv.style.color = "red";
+            feedbackDiv.style.color = "#ad2e3f";
             feedbackDiv.innerHTML = err.message;
         });
     };
@@ -347,7 +365,7 @@ document.addEventListener("DOMContentLoaded", function (event) {
             .then(function () {
             getEvents("/today");
         })["catch"](function (err) {
-            feedbackDiv.style.color = "red";
+            feedbackDiv.style.color = "#ad2e3f";
             feedbackDiv.innerHTML = err.message;
         });
     };
@@ -375,7 +393,7 @@ document.addEventListener("DOMContentLoaded", function (event) {
             ;
         }
         catch (err) {
-            feedbackDiv.style.color = "red";
+            feedbackDiv.style.color = "#ad2e3f";
             feedbackDiv.innerHTML = err.message;
             return;
         }
@@ -405,13 +423,13 @@ document.addEventListener("DOMContentLoaded", function (event) {
         })
             .then(function (json) {
             eventForm.reset();
-            feedbackDiv.style.color = "blue";
+            feedbackDiv.style.color = "#27acc6";
             feedbackDiv.innerHTML = "saved!";
             setTimeout(function () {
                 feedbackDiv.innerHTML = "";
             }, 2000);
         })["catch"](function (err) {
-            feedbackDiv.style.color = "red";
+            feedbackDiv.style.color = "#ad2e3f";
             feedbackDiv.innerHTML = err.message;
         });
     };
@@ -443,7 +461,7 @@ document.addEventListener("DOMContentLoaded", function (event) {
             .then(function () {
             appendEvents(events, timeframe);
         })["catch"](function (err) {
-            feedbackDiv.style.color = "red";
+            feedbackDiv.style.color = "#ad2e3f";
             feedbackDiv.innerHTML = err.message;
         });
     };
@@ -456,7 +474,7 @@ document.addEventListener("DOMContentLoaded", function (event) {
         }
         catch (err) {
             logout();
-            feedbackDiv.style.color = "red";
+            feedbackDiv.style.color = "#ad2e3f";
             feedbackDiv.innerHTML = err.message;
             return;
         }

@@ -95,6 +95,7 @@ document.addEventListener("DOMContentLoaded", (event) => {
   const eventDiv = <HTMLDivElement>document.querySelector("#event-div");
   const logoutButton = <HTMLButtonElement>document.querySelector("#logout-button");
   const createEventButton = <HTMLButtonElement>document.querySelector("#create-event-button");
+  const hideEventButton = <HTMLButtonElement>document.querySelector("#hide-event-button");
   const loginForm = <HTMLFormElement>document.querySelector("#login-form");
   const eventForm = <HTMLFormElement>document.querySelector("#event-form");
   const eventDateInput = <HTMLInputElement>document.querySelector("#event-date");
@@ -123,7 +124,7 @@ document.addEventListener("DOMContentLoaded", (event) => {
     },
   };
 
-  // don't let user pick a date in the past
+  // prevents user from picking a date in the past
   const today = new Date();
   month = String(today.getMonth() + 1);
   if (month.length === 1) {
@@ -169,6 +170,14 @@ document.addEventListener("DOMContentLoaded", (event) => {
 
     if (target.id === "create-event-button") {
       eventDiv.style.display = "block";
+      createEventButton.style.display = "none";
+      hideEventButton.style.display = "block";
+    };
+
+    if (target.id === "hide-event-button") {
+      eventDiv.style.display = "none";
+      createEventButton.style.display = "block";
+      hideEventButton.style.display = "none";
     };
 
     if (target.id === "today") {
@@ -255,6 +264,14 @@ document.addEventListener("DOMContentLoaded", (event) => {
   const appendEvents = (events: ScheduledEvent[], timeframe: string) => {
     eventsContainer.innerHTML = `<h3>${timeframeVals[timeframe]["header"]}</h3>`;
 
+    if (events.length === 0) {
+      eventsContainer.innerHTML += `
+      <div class="event-container" style="color:#27acc6;">
+        Nothing here!
+      </div>
+      `;
+    };
+
     // events aren't in chronological order -- sort of an issue
     events.forEach((evt) => {
       eventsContainer.innerHTML += `
@@ -267,27 +284,30 @@ document.addEventListener("DOMContentLoaded", (event) => {
     });
 
     const timeframeValsKeys = Object.keys(timeframeVals);
-    console.log(timeframeValsKeys)
     const timeframeButtons = timeframeValsKeys.map((a) => timeframeVals[a]["button"]);
 
     timeframeValsKeys.forEach((key) => {
-      console.log(key)
       if (timeframeVals[key]["button"] === timeframeVals[timeframe]["button"]) {
-        timeframeVals[key]["button"].style.display = "none";
+        timeframeVals[key]["button"].disabled = true;
+        timeframeVals[key]["button"].classList.add("unclickable");
       } else {
-        // hereherehereherehere change this to something that makes more sense
-        timeframeVals[key]["button"].style.display = "inline";
+        timeframeVals[key]["button"].disabled = false;
+        timeframeVals[key]["button"].classList.remove("unclickable");
       };
     });
   };
 
   // local is false by default -- true only if token is fetched from Chrome local storage
   const handleToken = (jwt: object, local=false) => {
+    // token was sent from backend
     if (!local) {
       // set to local storage before initializing as RawToken so format matches fetch response
       chrome.storage.local.remove(["token"], () => {
         chrome.storage.local.set({ token: jwt });
       });
+    // token was fetched locally
+    } else {
+      createEventButton.style.display = "block";
     };
 
     // user is logged in -- change display
@@ -318,7 +338,7 @@ document.addEventListener("DOMContentLoaded", (event) => {
       };
     }
     catch(err) {
-      feedbackDiv.style.color = "red";
+      feedbackDiv.style.color = "#ad2e3f";
       feedbackDiv.innerHTML = err.message;
       return
     };
@@ -347,11 +367,12 @@ document.addEventListener("DOMContentLoaded", (event) => {
       };
     })
     .then(jwt => {
+      hideEventButton.style.display = "block";
       eventDiv.style.display = "block";
       handleToken(jwt, false);
     })
     .catch((err) => {
-      feedbackDiv.style.color = "red";
+      feedbackDiv.style.color = "#ad2e3f";
       feedbackDiv.innerHTML = err.message;
     });
   };
@@ -387,7 +408,7 @@ document.addEventListener("DOMContentLoaded", (event) => {
       getEvents("/today");
     })
     .catch((err) => {
-      feedbackDiv.style.color = "red";
+      feedbackDiv.style.color = "#ad2e3f";
       feedbackDiv.innerHTML = err.message;
     });
   };
@@ -421,7 +442,7 @@ document.addEventListener("DOMContentLoaded", (event) => {
       };
     }
     catch(err) {
-      feedbackDiv.style.color = "red";
+      feedbackDiv.style.color = "#ad2e3f";
       feedbackDiv.innerHTML = err.message;
       return
     };
@@ -449,7 +470,7 @@ document.addEventListener("DOMContentLoaded", (event) => {
     })
     .then((json) => {
       eventForm.reset();
-      feedbackDiv.style.color = "blue";
+      feedbackDiv.style.color = "#27acc6";
       feedbackDiv.innerHTML = "saved!";
 
       setTimeout(() => {
@@ -457,7 +478,7 @@ document.addEventListener("DOMContentLoaded", (event) => {
       }, 2000);
     })
     .catch((err) => {
-      feedbackDiv.style.color = "red";
+      feedbackDiv.style.color = "#ad2e3f";
       feedbackDiv.innerHTML = err.message;
     });
   };
@@ -489,7 +510,7 @@ document.addEventListener("DOMContentLoaded", (event) => {
       appendEvents(events, timeframe);
     })
     .catch((err) => {
-      feedbackDiv.style.color = "red";
+      feedbackDiv.style.color = "#ad2e3f";
       feedbackDiv.innerHTML = err.message;
     });
   };
@@ -502,7 +523,7 @@ document.addEventListener("DOMContentLoaded", (event) => {
     }
     catch(err) {
       logout();
-      feedbackDiv.style.color = "red";
+      feedbackDiv.style.color = "#ad2e3f";
       feedbackDiv.innerHTML = err.message;
       return
     };
