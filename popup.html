@@ -8,10 +8,9 @@
   </head>
   <body>
     <h2>Remind Me</h2>
-    <button id="logout-button" style="display:none;">Log out</button>
     <button id="create-event-button" style="display:none;">New event</button>
     <div id="signup-div" style="display:none;">
-      <h3>Sign up</h3>
+      <h3 class="inline-head">Sign up</h3>
       <button id="login-button">Log in</button>
       <form id="signup-form">
         <label for="signup-username">Username</label>
@@ -29,7 +28,7 @@
       <br/>
     </div>
     <div id="login-div" style="display:block;">
-      <h3>Log in</h3>
+      <h3 class="inline-head">Log in</h3>
       <button id="signup-button">Signup</button>
       <form id="login-form">
         <label for="login-username">Username</label>
@@ -43,7 +42,7 @@
       <br/>
     </div>
     <div id="event-div" style="display:none;">
-      <h3>New Event</h3>
+      <h3 class="inline-head">New Event</h3>
       <form id="event-form">
         <label for="event-name">Name</label>
         <input type="text" id="event-name"></input>
@@ -70,5 +69,6 @@
         <!-- populated with events: ScheduledEvent[] -->
       </div>
     </div>
+    <button id="logout-button" style="display:none;">Log out</button>
   </body>
 </html>

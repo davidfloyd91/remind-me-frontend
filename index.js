@@ -37,9 +37,9 @@ var ParsedToken = /** @class */ (function () {
     return ParsedToken;
 }());
 // jwt
-var rawToken;
+var rawToken = { token: "" };
 var parsedToken;
-var userId;
+var userId = 0;
 // events array
 var events = [];
 // signup form values
@@ -58,6 +58,13 @@ var eventTime;
 // current date values
 var month;
 var date;
+// map /events routes to headers
+var timeframeHeaders = {
+    "/today": "Events Today",
+    "/tomorrow": "Events Tomorrow",
+    "/week": "Events This Week",
+    "": "All Events"
+};
 // generic error message
 var sorry = "Sorry, something went wrong!";
 document.addEventListener("DOMContentLoaded", function (event) {
@@ -107,11 +114,17 @@ document.addEventListener("DOMContentLoaded", function (event) {
         if (target.id === "signup-button") {
             signupDiv.style.display = "block";
             loginDiv.style.display = "none";
+            feedbackDiv.innerHTML = "";
         }
         ;
         if (target.id === "login-button") {
             signupDiv.style.display = "none";
             loginDiv.style.display = "block";
+            feedbackDiv.innerHTML = "";
+        }
+        ;
+        if (target.id === "create-event-button") {
+            eventDiv.style.display = "block";
         }
         ;
         if (target.id === "today") {
@@ -193,8 +206,9 @@ document.addEventListener("DOMContentLoaded", function (event) {
         }
         ;
     });
-    var appendEvents = function (events) {
-        eventsContainer.innerHTML = "";
+    var appendEvents = function (events, timeframe) {
+        eventsContainer.innerHTML = "<h3>" + timeframeHeaders[timeframe] + "</h3>";
+        // events aren't in chronological order -- sort of an issue
         events.forEach(function (evt) {
             eventsContainer.innerHTML += "\n        <div class=\"event-container\">\n          <div class=\"event-name\">" + evt.name + "</div>\n          <div class=\"event-description\">" + evt.description + "</div>\n          <div class=\"event-scheduled\">" + evt.scheduled + "</div>\n        </div>\n      ";
         });
@@ -204,8 +218,9 @@ document.addEventListener("DOMContentLoaded", function (event) {
         if (local === void 0) { local = false; }
         if (!local) {
             // set to local storage before initializing as RawToken so format matches fetch response
-            chrome.storage.local.remove(["token"]);
-            chrome.storage.local.set({ token: jwt });
+            chrome.storage.local.remove(["token"], function () {
+                chrome.storage.local.set({ token: jwt });
+            });
         }
         ;
         // user is logged in -- change display
@@ -265,8 +280,8 @@ document.addEventListener("DOMContentLoaded", function (event) {
             ;
         })
             .then(function (jwt) {
-            handleToken(jwt, false);
             eventDiv.style.display = "block";
+            handleToken(jwt, false);
         })["catch"](function (err) {
             feedbackDiv.style.color = "red";
             feedbackDiv.innerHTML = err.message;
@@ -294,13 +309,19 @@ document.addEventListener("DOMContentLoaded", function (event) {
             ;
         })
             .then(function (jwt) {
+            createEventButton.style.display = "block";
             handleToken(jwt, false);
+        })
+            .then(function () {
+            getEvents("/today");
         })["catch"](function (err) {
             feedbackDiv.style.color = "red";
             feedbackDiv.innerHTML = err.message;
         });
     };
     var logout = function () {
+        userId = 0;
+        rawToken.token = "";
         chrome.storage.local.remove(["token"]);
         feedbackDiv.innerHTML = "";
         // user is logged out -- change display
@@ -309,8 +330,10 @@ document.addEventListener("DOMContentLoaded", function (event) {
         loggedInDiv.style.display = "none";
         signupDiv.style.display = "none";
         eventDiv.style.display = "none";
+        createEventButton.style.display = "none";
     };
     var createEvent = function () {
+        checkForUserIdAndRawToken();
         // timezone is hardcoded don't keep it that way
         var eventDateTime = eventDate + "T" + eventTime + ":00-04:00";
         try {
@@ -361,20 +384,7 @@ document.addEventListener("DOMContentLoaded", function (event) {
         });
     };
     var getEvents = function (timeframe) {
-        // is this try-catch block necessary? won't it fail in the fetch? is logging out the best way to handle?
-        try {
-            if (!userId || !rawToken) {
-                throw new Error(sorry);
-            }
-            ;
-        }
-        catch (err) {
-            logout();
-            feedbackDiv.style.color = "red";
-            feedbackDiv.innerHTML = err.message;
-            return;
-        }
-        ;
+        checkForUserIdAndRawToken();
         fetch(url + "/users/" + userId + "/events" + timeframe, {
             headers: {
                 "Token": rawToken.token
@@ -399,10 +409,25 @@ document.addEventListener("DOMContentLoaded", function (event) {
             }
         })
             .then(function () {
-            appendEvents(events);
+            appendEvents(events, timeframe);
         })["catch"](function (err) {
             feedbackDiv.style.color = "red";
             feedbackDiv.innerHTML = err.message;
         });
+    };
+    var checkForUserIdAndRawToken = function () {
+        try {
+            if (!userId || userId === 0 || !rawToken || rawToken.token === "") {
+                throw new Error(sorry);
+            }
+            ;
+        }
+        catch (err) {
+            logout();
+            feedbackDiv.style.color = "red";
+            feedbackDiv.innerHTML = err.message;
+            return;
+        }
+        ;
     };
 });

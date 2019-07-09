@@ -59,9 +59,9 @@ class ParsedToken {
 }
 
 // jwt
-let rawToken: RawToken;
+let rawToken = <RawToken>{token: ""};
 let parsedToken: ParsedToken;
-let userId: number;
+let userId = 0;
 
 // events array
 let events: ScheduledEvent[] = [];
@@ -85,6 +85,14 @@ let eventTime: string;
 // current date values
 let month: string;
 let date: string;
+
+// map /events routes to headers
+const timeframeHeaders = {
+  "/today": "Events Today",
+  "/tomorrow": "Events Tomorrow",
+  "/week": "Events This Week",
+  "": "All Events"
+};
 
 // generic error message
 const sorry = "Sorry, something went wrong!";
@@ -138,11 +146,17 @@ document.addEventListener("DOMContentLoaded", (event) => {
     if (target.id === "signup-button") {
       signupDiv.style.display = "block";
       loginDiv.style.display = "none";
+      feedbackDiv.innerHTML = "";
     };
 
     if (target.id === "login-button") {
       signupDiv.style.display = "none";
       loginDiv.style.display = "block";
+      feedbackDiv.innerHTML = "";
+    };
+
+    if (target.id === "create-event-button") {
+      eventDiv.style.display = "block";
     };
 
     if (target.id === "today") {
@@ -226,9 +240,10 @@ document.addEventListener("DOMContentLoaded", (event) => {
     };
   });
 
-  const appendEvents = (events: ScheduledEvent[]) => {
-    eventsContainer.innerHTML = "";
+  const appendEvents = (events: ScheduledEvent[], timeframe: string) => {
+    eventsContainer.innerHTML = `<h3>${timeframeHeaders[timeframe]}</h3>`;
 
+    // events aren't in chronological order -- sort of an issue
     events.forEach((evt) => {
       eventsContainer.innerHTML += `
         <div class="event-container">
@@ -244,8 +259,9 @@ document.addEventListener("DOMContentLoaded", (event) => {
   const handleToken = (jwt: object, local=false) => {
     if (!local) {
       // set to local storage before initializing as RawToken so format matches fetch response
-      chrome.storage.local.remove(["token"]);
-      chrome.storage.local.set({ token: jwt });
+      chrome.storage.local.remove(["token"], () => {
+        chrome.storage.local.set({ token: jwt });
+      });
     };
 
     // user is logged in -- change display
@@ -305,8 +321,8 @@ document.addEventListener("DOMContentLoaded", (event) => {
       };
     })
     .then(jwt => {
-      handleToken(jwt, false);
       eventDiv.style.display = "block";
+      handleToken(jwt, false);
     })
     .catch((err) => {
       feedbackDiv.style.color = "red";
@@ -334,7 +350,11 @@ document.addEventListener("DOMContentLoaded", (event) => {
       };
     })
     .then((jwt) => {
+      createEventButton.style.display = "block";
       handleToken(jwt, false);
+    })
+    .then(() => {
+      getEvents("/today");
     })
     .catch((err) => {
       feedbackDiv.style.color = "red";
@@ -343,6 +363,9 @@ document.addEventListener("DOMContentLoaded", (event) => {
   };
 
   const logout = () => {
+    userId = 0;
+    rawToken.token = "";
+
     chrome.storage.local.remove(["token"]);
 
     feedbackDiv.innerHTML = "";
@@ -353,9 +376,12 @@ document.addEventListener("DOMContentLoaded", (event) => {
     loggedInDiv.style.display = "none";
     signupDiv.style.display = "none";
     eventDiv.style.display = "none";
+    createEventButton.style.display = "none";
   };
 
   const createEvent= () => {
+    checkForUserIdAndRawToken();
+
     // timezone is hardcoded don't keep it that way
     const eventDateTime = eventDate + "T" + eventTime + ":00-04:00";
 
@@ -407,18 +433,7 @@ document.addEventListener("DOMContentLoaded", (event) => {
   };
 
   const getEvents = (timeframe: string) => {
-    // is this try-catch block necessary? won't it fail in the fetch? is logging out the best way to handle?
-    try {
-      if (!userId || !rawToken) {
-        throw new Error(sorry);
-      };
-    }
-    catch(err) {
-      logout();
-      feedbackDiv.style.color = "red";
-      feedbackDiv.innerHTML = err.message;
-      return
-    };
+    checkForUserIdAndRawToken();
 
     fetch(url + "/users/" + userId + "/events" + timeframe, {
       headers: {
@@ -441,11 +456,25 @@ document.addEventListener("DOMContentLoaded", (event) => {
       }
     })
     .then(() => {
-      appendEvents(events);
+      appendEvents(events, timeframe);
     })
     .catch((err) => {
       feedbackDiv.style.color = "red";
       feedbackDiv.innerHTML = err.message;
     });
+  };
+
+  const checkForUserIdAndRawToken = () => {
+    try {
+      if (!userId || userId === 0 || !rawToken || rawToken.token === "") {
+        throw new Error(sorry);
+      };
+    }
+    catch(err) {
+      logout();
+      feedbackDiv.style.color = "red";
+      feedbackDiv.innerHTML = err.message;
+      return
+    };
   };
 });

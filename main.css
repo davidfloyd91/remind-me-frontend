@@ -13,7 +13,7 @@ div {
   margin-bottom: 5px;
 }
 
-button, input {
+button, input, textarea {
   border-color: #eee;
   background-color: #111;
   color: #eee;
@@ -38,8 +38,12 @@ h2 {
   margin-bottom: 0.5em;
 }
 
-h3 {
+.inline-head {
   display: inline;
+}
+
+h3 {
+  margin-bottom: 5px;
 }
 
 #signup-button, #login-button {
