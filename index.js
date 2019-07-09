@@ -76,16 +76,20 @@ document.addEventListener("DOMContentLoaded", function (event) {
     // map /events routes to headers
     var timeframeVals = {
         "/today": {
-            "header": "Events today"
+            "header": "Events today",
+            "button": (function () { return document.querySelector("#today"); })()
         },
         "/tomorrow": {
-            "header": "Events tomorrow"
+            "header": "Events tomorrow",
+            "button": (function () { return document.querySelector("#tomorrow"); })()
         },
         "/week": {
-            "header": "Events this week"
+            "header": "Events this week",
+            "button": (function () { return document.querySelector("#week"); })()
         },
         "": {
-            "header": "All events"
+            "header": "All events",
+            "button": (function () { return document.querySelector("#all"); })()
         }
     };
     // don't let user pick a date in the past
@@ -220,6 +224,10 @@ document.addEventListener("DOMContentLoaded", function (event) {
         events.forEach(function (evt) {
             eventsContainer.innerHTML += "\n        <div class=\"event-container\">\n          <div class=\"event-name\">" + evt.name + "</div>\n          <div class=\"event-description\">" + evt.description + "</div>\n          <div class=\"event-scheduled\">" + evt.scheduled + "</div>\n        </div>\n      ";
         });
+        var timeframeValsKeys = Object.keys(timeframeVals);
+        // console.log(timeframeValsKeys) // this worked
+        var timeframeButtons = timeframeValsKeys.map(function (a) { console.log(timeframeVals[a]); return timeframeVals[a]["button"]; });
+        console.log(timeframeButtons);
     };
     // local is false by default -- true only if token is fetched from Chrome local storage
     var handleToken = function (jwt, local) {

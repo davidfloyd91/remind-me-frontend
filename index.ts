@@ -107,15 +107,19 @@ document.addEventListener("DOMContentLoaded", (event) => {
   const timeframeVals = {
     "/today": {
       "header": "Events today",
+      "button": (() => document.querySelector("#today"))()
     },
     "/tomorrow": {
       "header": "Events tomorrow",
+      "button": (() => document.querySelector("#tomorrow"))()
     },
     "/week": {
       "header": "Events this week",
+      "button": (() => document.querySelector("#week"))()
     },
     "": {
-      "header": "All events"
+      "header": "All events",
+      "button": (() => document.querySelector("#all"))()
     },
   };
 
@@ -261,6 +265,12 @@ document.addEventListener("DOMContentLoaded", (event) => {
         </div>
       `;
     });
+
+    const timeframeValsKeys = Object.keys(timeframeVals);
+    // console.log(timeframeValsKeys) // this worked
+    const timeframeButtons = timeframeValsKeys.map((a) => {console.log(timeframeVals[a]); return timeframeVals[a]["button"];});
+
+    console.log(timeframeButtons)
   };
 
   // local is false by default -- true only if token is fetched from Chrome local storage
