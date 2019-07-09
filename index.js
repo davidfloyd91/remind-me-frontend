@@ -58,13 +58,6 @@ var eventTime;
 // current date values
 var month;
 var date;
-// map /events routes to headers
-var timeframeHeaders = {
-    "/today": "Events today",
-    "/tomorrow": "Events tomorrow",
-    "/week": "Events this week",
-    "": "All events"
-};
 // generic error message
 var sorry = "Sorry, something went wrong!";
 document.addEventListener("DOMContentLoaded", function (event) {
@@ -80,6 +73,21 @@ document.addEventListener("DOMContentLoaded", function (event) {
     var loggedInDiv = document.querySelector("#logged-in");
     var feedbackDiv = document.querySelector("#feedback");
     var eventsContainer = document.querySelector("#events-container");
+    // map /events routes to headers
+    var timeframeVals = {
+        "/today": {
+            "header": "Events today"
+        },
+        "/tomorrow": {
+            "header": "Events tomorrow"
+        },
+        "/week": {
+            "header": "Events this week"
+        },
+        "": {
+            "header": "All events"
+        }
+    };
     // don't let user pick a date in the past
     var today = new Date();
     month = String(today.getMonth() + 1);
@@ -207,7 +215,7 @@ document.addEventListener("DOMContentLoaded", function (event) {
         ;
     });
     var appendEvents = function (events, timeframe) {
-        eventsContainer.innerHTML = "<h3>" + timeframeHeaders[timeframe] + "</h3>";
+        eventsContainer.innerHTML = "<h3>" + timeframeVals[timeframe]["header"] + "</h3>";
         // events aren't in chronological order -- sort of an issue
         events.forEach(function (evt) {
             eventsContainer.innerHTML += "\n        <div class=\"event-container\">\n          <div class=\"event-name\">" + evt.name + "</div>\n          <div class=\"event-description\">" + evt.description + "</div>\n          <div class=\"event-scheduled\">" + evt.scheduled + "</div>\n        </div>\n      ";

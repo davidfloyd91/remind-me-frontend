@@ -86,14 +86,6 @@ let eventTime: string;
 let month: string;
 let date: string;
 
-// map /events routes to headers
-const timeframeHeaders = {
-  "/today": "Events today",
-  "/tomorrow": "Events tomorrow",
-  "/week": "Events this week",
-  "": "All events"
-};
-
 // generic error message
 const sorry = "Sorry, something went wrong!";
 
@@ -110,6 +102,22 @@ document.addEventListener("DOMContentLoaded", (event) => {
   const loggedInDiv = <HTMLDivElement>document.querySelector("#logged-in");
   const feedbackDiv = <HTMLDivElement>document.querySelector("#feedback");
   const eventsContainer = <HTMLDivElement>document.querySelector("#events-container");
+
+  // map /events routes to headers
+  const timeframeVals = {
+    "/today": {
+      "header": "Events today",
+    },
+    "/tomorrow": {
+      "header": "Events tomorrow",
+    },
+    "/week": {
+      "header": "Events this week",
+    },
+    "": {
+      "header": "All events"
+    },
+  };
 
   // don't let user pick a date in the past
   const today = new Date();
@@ -241,7 +249,7 @@ document.addEventListener("DOMContentLoaded", (event) => {
   });
 
   const appendEvents = (events: ScheduledEvent[], timeframe: string) => {
-    eventsContainer.innerHTML = `<h3>${timeframeHeaders[timeframe]}</h3>`;
+    eventsContainer.innerHTML = `<h3>${timeframeVals[timeframe]["header"]}</h3>`;
 
     // events aren't in chronological order -- sort of an issue
     events.forEach((evt) => {
