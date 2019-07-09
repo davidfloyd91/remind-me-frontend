@@ -47,6 +47,26 @@ h2 {
   color: #aaa;
 }
 
+.event-container {
+  width: 90%;
+  text-align: center;
+  margin: 0 auto 8px auto;
+  border-style: solid;
+  border-color: #eee;
+  border-radius: 5px;
+  border-width: 1px;
+  padding-top: 5px;
+}
+
+.event-name {
+  font-size: 1.125em;
+}
+
+#events-container {
+  max-height: 380px;
+  overflow-y: scroll;
+}
+
 h3 {
   margin-bottom: 5px;
 }

@@ -1,3 +1,5 @@
+// colors are from https://flatuicolors.com/palette/nl
+// when you save a new event, it should show up (if appropriate)
 var url = "http://localhost:8000";
 var ScheduledEvent = /** @class */ (function () {
     function ScheduledEvent(a) {
@@ -74,6 +76,7 @@ document.addEventListener("DOMContentLoaded", function (event) {
     var loggedInDiv = document.querySelector("#logged-in");
     var feedbackDiv = document.querySelector("#feedback");
     var eventsContainer = document.querySelector("#events-container");
+    var eventsHeader = document.querySelector("#events-header");
     // map /events routes to headers
     var timeframeVals = {
         "/today": {
@@ -228,14 +231,23 @@ document.addEventListener("DOMContentLoaded", function (event) {
         ;
     });
     var appendEvents = function (events, timeframe) {
-        eventsContainer.innerHTML = "<h3>" + timeframeVals[timeframe]["header"] + "</h3>";
+        var colors = [
+            "#FFC312",
+            "#12CBC4",
+            "#A3CB38",
+            "#ED4C67",
+            "#9980FA",
+        ];
+        eventsHeader.innerHTML = "<h3>" + timeframeVals[timeframe]["header"] + "</h3>";
+        eventsContainer.innerHTML = "";
         if (events.length === 0) {
-            eventsContainer.innerHTML += "\n      <div class=\"event-container\" style=\"color:#27acc6;\">\n        Nothing here!\n      </div>\n      ";
+            eventsContainer.innerHTML += "\n      <div class=\"event-container\" style=\"color:#12CBC4;\">\n        <div>\n          Nothing here!\n        </div>\n      </div>\n      ";
         }
         ;
         // events aren't in chronological order -- sort of an issue
-        events.forEach(function (evt) {
-            eventsContainer.innerHTML += "\n        <div class=\"event-container\">\n          <div class=\"event-name\">" + evt.name + "</div>\n          <div class=\"event-description\">" + evt.description + "</div>\n          <div class=\"event-scheduled\">" + evt.scheduled + "</div>\n        </div>\n      ";
+        events.forEach(function (evt, index) {
+            var color = colors[index % colors.length];
+            eventsContainer.innerHTML += "\n        <div class=\"event-container\">\n          <div class=\"event-name\" style=\"color:" + color + ";\">" + evt.name + "</div>\n          <div class=\"event-description\">" + evt.description + "</div>\n          <div class=\"event-scheduled\">" + evt.scheduled + "</div>\n        </div>\n      ";
         });
         var timeframeValsKeys = Object.keys(timeframeVals);
         var timeframeButtons = timeframeValsKeys.map(function (a) { return timeframeVals[a]["button"]; });
@@ -295,7 +307,7 @@ document.addEventListener("DOMContentLoaded", function (event) {
             ;
         }
         catch (err) {
-            feedbackDiv.style.color = "#ad2e3f";
+            feedbackDiv.style.color = "#EA2027"; // red pigment
             feedbackDiv.innerHTML = err.message;
             return;
         }
@@ -332,7 +344,7 @@ document.addEventListener("DOMContentLoaded", function (event) {
             eventDiv.style.display = "block";
             handleToken(jwt, false);
         })["catch"](function (err) {
-            feedbackDiv.style.color = "#ad2e3f";
+            feedbackDiv.style.color = "#EA2027"; // red pigment
             feedbackDiv.innerHTML = err.message;
         });
     };
@@ -370,7 +382,7 @@ document.addEventListener("DOMContentLoaded", function (event) {
             .then(function () {
             getEvents("/today");
         })["catch"](function (err) {
-            feedbackDiv.style.color = "#ad2e3f";
+            feedbackDiv.style.color = "#EA2027"; // red pigment
             feedbackDiv.innerHTML = err.message;
         });
     };
@@ -400,7 +412,7 @@ document.addEventListener("DOMContentLoaded", function (event) {
             ;
         }
         catch (err) {
-            feedbackDiv.style.color = "#ad2e3f";
+            feedbackDiv.style.color = "#EA2027"; // red pigment
             feedbackDiv.innerHTML = err.message;
             return;
         }
@@ -430,13 +442,13 @@ document.addEventListener("DOMContentLoaded", function (event) {
         })
             .then(function (json) {
             eventForm.reset();
-            feedbackDiv.style.color = "#27acc6";
-            feedbackDiv.innerHTML = "saved!";
+            feedbackDiv.style.color = "#12CBC4"; // blue martina
+            feedbackDiv.innerHTML = "Saved!";
             setTimeout(function () {
                 feedbackDiv.innerHTML = "";
             }, 2000);
         })["catch"](function (err) {
-            feedbackDiv.style.color = "#ad2e3f";
+            feedbackDiv.style.color = "#EA2027"; // red pigment
             feedbackDiv.innerHTML = err.message;
         });
     };
@@ -468,7 +480,7 @@ document.addEventListener("DOMContentLoaded", function (event) {
             .then(function () {
             appendEvents(events, timeframe);
         })["catch"](function (err) {
-            feedbackDiv.style.color = "#ad2e3f";
+            feedbackDiv.style.color = "#EA2027"; // red pigment
             feedbackDiv.innerHTML = err.message;
         });
     };
@@ -481,7 +493,7 @@ document.addEventListener("DOMContentLoaded", function (event) {
         }
         catch (err) {
             logout();
-            feedbackDiv.style.color = "#ad2e3f";
+            feedbackDiv.style.color = "#EA2027"; // red pigment
             feedbackDiv.innerHTML = err.message;
             return;
         }

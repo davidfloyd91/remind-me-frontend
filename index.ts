@@ -1,3 +1,7 @@
+// colors are from https://flatuicolors.com/palette/nl
+
+// when you save a new event, it should show up (if appropriate)
+
 const url: string = "http://localhost:8000";
 
 class ScheduledEvent {
@@ -103,6 +107,7 @@ document.addEventListener("DOMContentLoaded", (event) => {
   const loggedInDiv = <HTMLDivElement>document.querySelector("#logged-in");
   const feedbackDiv = <HTMLDivElement>document.querySelector("#feedback");
   const eventsContainer = <HTMLDivElement>document.querySelector("#events-container");
+  const eventsHeader = <HTMLDivElement>document.querySelector("#events-header");
 
   // map /events routes to headers
   const timeframeVals = {
@@ -262,21 +267,35 @@ document.addEventListener("DOMContentLoaded", (event) => {
   });
 
   const appendEvents = (events: ScheduledEvent[], timeframe: string) => {
-    eventsContainer.innerHTML = `<h3>${timeframeVals[timeframe]["header"]}</h3>`;
+    const colors = [
+      "#FFC312",/*sunflower*/
+      "#12CBC4",/*blue martina*/
+      "#A3CB38",/*android green*/
+      "#ED4C67",/*bara red*/
+      "#9980FA",/*forgotten purple*/
+    ];
+
+    eventsHeader.innerHTML = `<h3>${timeframeVals[timeframe]["header"]}</h3>`;
+    
+    eventsContainer.innerHTML = "";
 
     if (events.length === 0) {
       eventsContainer.innerHTML += `
-      <div class="event-container" style="color:#27acc6;">
-        Nothing here!
+      <div class="event-container" style="color:#12CBC4;">
+        <div>
+          Nothing here!
+        </div>
       </div>
       `;
     };
 
     // events aren't in chronological order -- sort of an issue
-    events.forEach((evt) => {
+    events.forEach((evt, index) => {
+      let color = colors[index % colors.length];
+
       eventsContainer.innerHTML += `
         <div class="event-container">
-          <div class="event-name">${evt.name}</div>
+          <div class="event-name" style="color:${color};">${evt.name}</div>
           <div class="event-description">${evt.description}</div>
           <div class="event-scheduled">${evt.scheduled}</div>
         </div>
@@ -343,7 +362,7 @@ document.addEventListener("DOMContentLoaded", (event) => {
       };
     }
     catch(err) {
-      feedbackDiv.style.color = "#ad2e3f";
+      feedbackDiv.style.color = "#EA2027"; // red pigment
       feedbackDiv.innerHTML = err.message;
       return
     };
@@ -377,7 +396,7 @@ document.addEventListener("DOMContentLoaded", (event) => {
       handleToken(jwt, false);
     })
     .catch((err) => {
-      feedbackDiv.style.color = "#ad2e3f";
+      feedbackDiv.style.color = "#EA2027"; // red pigment
       feedbackDiv.innerHTML = err.message;
     });
   };
@@ -413,7 +432,7 @@ document.addEventListener("DOMContentLoaded", (event) => {
       getEvents("/today");
     })
     .catch((err) => {
-      feedbackDiv.style.color = "#ad2e3f";
+      feedbackDiv.style.color = "#EA2027"; // red pigment
       feedbackDiv.innerHTML = err.message;
     });
   };
@@ -450,7 +469,7 @@ document.addEventListener("DOMContentLoaded", (event) => {
       };
     }
     catch(err) {
-      feedbackDiv.style.color = "#ad2e3f";
+      feedbackDiv.style.color = "#EA2027"; // red pigment
       feedbackDiv.innerHTML = err.message;
       return
     };
@@ -478,15 +497,15 @@ document.addEventListener("DOMContentLoaded", (event) => {
     })
     .then((json) => {
       eventForm.reset();
-      feedbackDiv.style.color = "#27acc6";
-      feedbackDiv.innerHTML = "saved!";
+      feedbackDiv.style.color = "#12CBC4"; // blue martina
+      feedbackDiv.innerHTML = "Saved!";
 
       setTimeout(() => {
         feedbackDiv.innerHTML = "";
       }, 2000);
     })
     .catch((err) => {
-      feedbackDiv.style.color = "#ad2e3f";
+      feedbackDiv.style.color = "#EA2027"; // red pigment
       feedbackDiv.innerHTML = err.message;
     });
   };
@@ -518,7 +537,7 @@ document.addEventListener("DOMContentLoaded", (event) => {
       appendEvents(events, timeframe);
     })
     .catch((err) => {
-      feedbackDiv.style.color = "#ad2e3f";
+      feedbackDiv.style.color = "#EA2027"; // red pigment
       feedbackDiv.innerHTML = err.message;
     });
   };
@@ -531,7 +550,7 @@ document.addEventListener("DOMContentLoaded", (event) => {
     }
     catch(err) {
       logout();
-      feedbackDiv.style.color = "#ad2e3f";
+      feedbackDiv.style.color = "#EA2027"; // red pigment
       feedbackDiv.innerHTML = err.message;
       return
     };
