@@ -225,9 +225,19 @@ document.addEventListener("DOMContentLoaded", function (event) {
             eventsContainer.innerHTML += "\n        <div class=\"event-container\">\n          <div class=\"event-name\">" + evt.name + "</div>\n          <div class=\"event-description\">" + evt.description + "</div>\n          <div class=\"event-scheduled\">" + evt.scheduled + "</div>\n        </div>\n      ";
         });
         var timeframeValsKeys = Object.keys(timeframeVals);
-        // console.log(timeframeValsKeys) // this worked
-        var timeframeButtons = timeframeValsKeys.map(function (a) { console.log(timeframeVals[a]); return timeframeVals[a]["button"]; });
-        console.log(timeframeButtons);
+        console.log(timeframeValsKeys);
+        var timeframeButtons = timeframeValsKeys.map(function (a) { return timeframeVals[a]["button"]; });
+        timeframeValsKeys.forEach(function (key) {
+            console.log(key);
+            if (timeframeVals[key]["button"] === timeframeVals[timeframe]["button"]) {
+                timeframeVals[key]["button"].style.display = "none";
+            }
+            else {
+                // hereherehereherehere change this to something that makes more sense
+                timeframeVals[key]["button"].style.display = "inline";
+            }
+            ;
+        });
     };
     // local is false by default -- true only if token is fetched from Chrome local storage
     var handleToken = function (jwt, local) {

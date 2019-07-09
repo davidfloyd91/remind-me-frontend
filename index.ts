@@ -267,10 +267,18 @@ document.addEventListener("DOMContentLoaded", (event) => {
     });
 
     const timeframeValsKeys = Object.keys(timeframeVals);
-    // console.log(timeframeValsKeys) // this worked
-    const timeframeButtons = timeframeValsKeys.map((a) => {console.log(timeframeVals[a]); return timeframeVals[a]["button"];});
+    console.log(timeframeValsKeys)
+    const timeframeButtons = timeframeValsKeys.map((a) => timeframeVals[a]["button"]);
 
-    console.log(timeframeButtons)
+    timeframeValsKeys.forEach((key) => {
+      console.log(key)
+      if (timeframeVals[key]["button"] === timeframeVals[timeframe]["button"]) {
+        timeframeVals[key]["button"].style.display = "none";
+      } else {
+        // hereherehereherehere change this to something that makes more sense
+        timeframeVals[key]["button"].style.display = "inline";
+      };
+    });
   };
 
   // local is false by default -- true only if token is fetched from Chrome local storage
