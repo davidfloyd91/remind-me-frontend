@@ -297,7 +297,7 @@ document.addEventListener("DOMContentLoaded", (event) => {
     });
   };
 
-  // local is false by default -- true only if token is fetched from Chrome local storage
+  // local is false by default -- true only if token is fetched from Chrome local storage (meaning it's just a popup refresh)
   const handleToken = (jwt: object, local=false) => {
     // token was sent from backend
     if (!local) {
@@ -329,6 +329,11 @@ document.addEventListener("DOMContentLoaded", (event) => {
 
     parsedToken = new ParsedToken(JSON.parse(jsonPayload));
     userId = parsedToken.userId;
+
+    // grab the events today if the token was fetched locally
+    if (local) {
+      getEvents("/today");
+    };
   };
 
   const signup = () => {
