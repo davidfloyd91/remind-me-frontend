@@ -60,10 +60,10 @@ var month;
 var date;
 // map /events routes to headers
 var timeframeHeaders = {
-    "/today": "Events Today",
-    "/tomorrow": "Events Tomorrow",
-    "/week": "Events This Week",
-    "": "All Events"
+    "/today": "Events today",
+    "/tomorrow": "Events tomorrow",
+    "/week": "Events this week",
+    "": "All events"
 };
 // generic error message
 var sorry = "Sorry, something went wrong!";
@@ -304,7 +304,13 @@ document.addEventListener("DOMContentLoaded", function (event) {
                 return res.json();
             }
             else {
-                throw new Error(sorry);
+                if (res.status === 401) {
+                    throw new Error("Sorry, that doesn't look right!");
+                }
+                else {
+                    throw new Error(sorry);
+                }
+                ;
             }
             ;
         })

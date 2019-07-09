@@ -88,10 +88,10 @@ let date: string;
 
 // map /events routes to headers
 const timeframeHeaders = {
-  "/today": "Events Today",
-  "/tomorrow": "Events Tomorrow",
-  "/week": "Events This Week",
-  "": "All Events"
+  "/today": "Events today",
+  "/tomorrow": "Events tomorrow",
+  "/week": "Events this week",
+  "": "All events"
 };
 
 // generic error message
@@ -346,7 +346,11 @@ document.addEventListener("DOMContentLoaded", (event) => {
         feedbackDiv.innerHTML = "";
         return res.json();
       } else {
-        throw new Error(sorry);
+        if (res.status === 401) {
+          throw new Error("Sorry, that doesn't look right!");
+        } else {
+          throw new Error(sorry);
+        };
       };
     })
     .then((jwt) => {
