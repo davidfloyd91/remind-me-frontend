@@ -1,5 +1,3 @@
-// TODOTODOTODOTODO
-// when you save a new event, it should show up (if appropriate)
 var url = "http://localhost:8000";
 var ScheduledEvent = /** @class */ (function () {
     function ScheduledEvent(a) {
@@ -57,9 +55,7 @@ var eventName;
 var eventDescription;
 var eventDate;
 var eventTime;
-// current date values
-var month;
-var date;
+var currentTimeframe;
 // generic error message
 var sorry = "Sorry, something went wrong!";
 // https://flatuicolors.com/palette/nl
@@ -70,6 +66,20 @@ var colors = [
     "#ED4C67",
     "#9980FA",
 ];
+var months = {
+    "01": "Jan",
+    "02": "Feb",
+    "03": "Mar",
+    "04": "Apr",
+    "05": "May",
+    "06": "Jun",
+    "07": "Jul",
+    "08": "Aug",
+    "09": "Sep",
+    "10": "Oct",
+    "11": "Nov",
+    "12": "Dec"
+};
 document.addEventListener("DOMContentLoaded", function (event) {
     var signupDiv = document.querySelector("#signup-div");
     var loginDiv = document.querySelector("#login-div");
@@ -106,12 +116,12 @@ document.addEventListener("DOMContentLoaded", function (event) {
     };
     // prevents user from picking a date in the past
     var today = new Date();
-    month = String(today.getMonth() + 1);
+    var month = String(today.getMonth() + 1);
     if (month.length === 1) {
         month = "0" + month;
     }
     ;
-    date = String(today.getDate());
+    var date = String(today.getDate());
     if (date.length === 1) {
         date = "0" + date;
     }
@@ -239,23 +249,7 @@ document.addEventListener("DOMContentLoaded", function (event) {
         ;
     });
     var parseDateTime = function (dateTime) {
-        var months = {
-            "01": "Jan",
-            "02": "Feb",
-            "03": "Mar",
-            "04": "Apr",
-            "05": "May",
-            "06": "Jun",
-            "07": "Jul",
-            "08": "Aug",
-            "09": "Sep",
-            "10": "Oct",
-            "11": "Nov",
-            "12": "Dec"
-        };
-        // "2019-07-10T12:00:00-04:00"
         var dateTimeArr = dateTime.split("-").slice(0, 3);
-        // ["2019", "07", "10T12:00:00"]
         var year = dateTimeArr[0];
         var month = months[dateTimeArr[1]];
         var tSplit = dateTimeArr[2].split("T");
@@ -267,6 +261,7 @@ document.addEventListener("DOMContentLoaded", function (event) {
         return month + " " + date + ", " + year + " at " + hour + ":" + minute + amPm;
     };
     var appendEvents = function (events, timeframe) {
+        currentTimeframe = timeframe;
         eventsHeader.innerHTML = "<h3>" + timeframeVals[timeframe]["header"] + "</h3>";
         eventsContainer.innerHTML = "";
         if (events.length === 0) {
@@ -485,6 +480,12 @@ document.addEventListener("DOMContentLoaded", function (event) {
             eventForm.reset();
             feedbackDiv.style.color = "#12CBC4"; // blue martina
             feedbackDiv.innerHTML = "Saved!";
+            // don't compare to events, figure out the end of the timeframe
+            if (!events[0] || eventDateTime <= events[events.length - 1].scheduled) {
+                events.push(new ScheduledEvent(json));
+                appendEvents(events, currentTimeframe);
+            }
+            ;
             setTimeout(function () {
                 feedbackDiv.innerHTML = "";
             }, 2000);

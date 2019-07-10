@@ -1,6 +1,3 @@
-// TODOTODOTODOTODO
-// when you save a new event, it should show up (if appropriate)
-
 const url: string = "http://localhost:8000";
 
 class ScheduledEvent {
@@ -85,9 +82,7 @@ let eventDescription: string;
 let eventDate: string;
 let eventTime: string;
 
-// current date values
-let month: string;
-let date: string;
+let currentTimeframe: string;
 
 // generic error message
 const sorry = "Sorry, something went wrong!";
@@ -100,6 +95,21 @@ const colors = [
   "#ED4C67",/*bara red*/
   "#9980FA",/*forgotten purple*/
 ];
+
+const months = {
+  "01": "Jan",
+  "02": "Feb",
+  "03": "Mar",
+  "04": "Apr",
+  "05": "May",
+  "06": "Jun",
+  "07": "Jul",
+  "08": "Aug",
+  "09": "Sep",
+  "10": "Oct",
+  "11": "Nov",
+  "12": "Dec"
+};
 
 document.addEventListener("DOMContentLoaded", (event) => {
   const signupDiv = <HTMLDivElement>document.querySelector("#signup-div");
@@ -139,11 +149,11 @@ document.addEventListener("DOMContentLoaded", (event) => {
 
   // prevents user from picking a date in the past
   const today = new Date();
-  month = String(today.getMonth() + 1);
+  let month = String(today.getMonth() + 1);
   if (month.length === 1) {
     month = "0" + month;
   };
-  date = String(today.getDate());
+  let date = String(today.getDate());
   if (date.length === 1) {
     date = "0" + date;
   };
@@ -275,24 +285,7 @@ document.addEventListener("DOMContentLoaded", (event) => {
   });
 
   const parseDateTime = (dateTime: string): string => {
-    const months = {
-      "01": "Jan",
-      "02": "Feb",
-      "03": "Mar",
-      "04": "Apr",
-      "05": "May",
-      "06": "Jun",
-      "07": "Jul",
-      "08": "Aug",
-      "09": "Sep",
-      "10": "Oct",
-      "11": "Nov",
-      "12": "Dec"
-    };
-
-    // "2019-07-10T12:00:00-04:00"
     const dateTimeArr = dateTime.split("-").slice(0, 3);
-    // ["2019", "07", "10T12:00:00"]
     const year = dateTimeArr[0];
     const month = months[dateTimeArr[1]];
     const tSplit = dateTimeArr[2].split("T");
@@ -306,6 +299,8 @@ document.addEventListener("DOMContentLoaded", (event) => {
   };
 
   const appendEvents = (events: ScheduledEvent[], timeframe: string) => {
+    currentTimeframe = timeframe;
+
     eventsHeader.innerHTML = `<h3>${timeframeVals[timeframe]["header"]}</h3>`;
 
     eventsContainer.innerHTML = "";
@@ -544,6 +539,12 @@ document.addEventListener("DOMContentLoaded", (event) => {
       eventForm.reset();
       feedbackDiv.style.color = "#12CBC4"; // blue martina
       feedbackDiv.innerHTML = "Saved!";
+
+      // don't compare to events, figure out the end of the timeframe
+      if (!events[0] || eventDateTime <= events[events.length - 1].scheduled) {
+        events.push(new ScheduledEvent(json));
+        appendEvents(events, currentTimeframe);
+      };
 
       setTimeout(() => {
         feedbackDiv.innerHTML = "";
