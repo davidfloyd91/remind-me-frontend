@@ -1,5 +1,4 @@
-// colors are from https://flatuicolors.com/palette/nl
-
+// TODOTODOTODOTODO
 // when you save a new event, it should show up (if appropriate)
 
 const url: string = "http://localhost:8000";
@@ -92,6 +91,15 @@ let date: string;
 
 // generic error message
 const sorry = "Sorry, something went wrong!";
+
+// https://flatuicolors.com/palette/nl
+const colors = [
+  "#FFC312",/*sunflower*/
+  "#12CBC4",/*blue martina*/
+  "#A3CB38",/*android green*/
+  "#ED4C67",/*bara red*/
+  "#9980FA",/*forgotten purple*/
+];
 
 document.addEventListener("DOMContentLoaded", (event) => {
   const signupDiv = <HTMLDivElement>document.querySelector("#signup-div");
@@ -266,17 +274,40 @@ document.addEventListener("DOMContentLoaded", (event) => {
     };
   });
 
-  const appendEvents = (events: ScheduledEvent[], timeframe: string) => {
-    const colors = [
-      "#FFC312",/*sunflower*/
-      "#12CBC4",/*blue martina*/
-      "#A3CB38",/*android green*/
-      "#ED4C67",/*bara red*/
-      "#9980FA",/*forgotten purple*/
-    ];
+  const parseDateTime = (dateTime: string): string => {
+    const months = {
+      "01": "Jan",
+      "02": "Feb",
+      "03": "Mar",
+      "04": "Apr",
+      "05": "May",
+      "06": "Jun",
+      "07": "Jul",
+      "08": "Aug",
+      "09": "Sep",
+      "10": "Oct",
+      "11": "Nov",
+      "12": "Dec"
+    };
 
+    // "2019-07-10T12:00:00-04:00"
+    const dateTimeArr = dateTime.split("-").slice(0, 3);
+    // ["2019", "07", "10T12:00:00"]
+    const year = dateTimeArr[0];
+    const month = months[dateTimeArr[1]];
+    const tSplit = dateTimeArr[2].split("T");
+    const date = tSplit[0];
+    const timeArr = tSplit[1].split(":");
+    const hour = parseInt(timeArr[0]) % 12 === 0 ? "12" : `${parseInt(timeArr[0]) % 12}`;
+    const minute = timeArr[1];
+    const amPm = parseInt(timeArr[0]) >= 12 ? "pm" : "am";
+
+    return month + " " + date + ", " + year + " at " + hour + ":" + minute + amPm;
+  };
+
+  const appendEvents = (events: ScheduledEvent[], timeframe: string) => {
     eventsHeader.innerHTML = `<h3>${timeframeVals[timeframe]["header"]}</h3>`;
-    
+
     eventsContainer.innerHTML = "";
 
     if (events.length === 0) {
@@ -297,7 +328,7 @@ document.addEventListener("DOMContentLoaded", (event) => {
         <div class="event-container">
           <div class="event-name" style="color:${color};">${evt.name}</div>
           <div class="event-description">${evt.description}</div>
-          <div class="event-scheduled">${evt.scheduled}</div>
+          <div class="event-scheduled">${parseDateTime(evt.scheduled)}</div>
         </div>
       `;
     });

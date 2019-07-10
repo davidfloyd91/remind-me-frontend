@@ -1,4 +1,4 @@
-// colors are from https://flatuicolors.com/palette/nl
+// TODOTODOTODOTODO
 // when you save a new event, it should show up (if appropriate)
 var url = "http://localhost:8000";
 var ScheduledEvent = /** @class */ (function () {
@@ -62,6 +62,14 @@ var month;
 var date;
 // generic error message
 var sorry = "Sorry, something went wrong!";
+// https://flatuicolors.com/palette/nl
+var colors = [
+    "#FFC312",
+    "#12CBC4",
+    "#A3CB38",
+    "#ED4C67",
+    "#9980FA",
+];
 document.addEventListener("DOMContentLoaded", function (event) {
     var signupDiv = document.querySelector("#signup-div");
     var loginDiv = document.querySelector("#login-div");
@@ -230,14 +238,35 @@ document.addEventListener("DOMContentLoaded", function (event) {
         }
         ;
     });
+    var parseDateTime = function (dateTime) {
+        var months = {
+            "01": "Jan",
+            "02": "Feb",
+            "03": "Mar",
+            "04": "Apr",
+            "05": "May",
+            "06": "Jun",
+            "07": "Jul",
+            "08": "Aug",
+            "09": "Sep",
+            "10": "Oct",
+            "11": "Nov",
+            "12": "Dec"
+        };
+        // "2019-07-10T12:00:00-04:00"
+        var dateTimeArr = dateTime.split("-").slice(0, 3);
+        // ["2019", "07", "10T12:00:00"]
+        var year = dateTimeArr[0];
+        var month = months[dateTimeArr[1]];
+        var tSplit = dateTimeArr[2].split("T");
+        var date = tSplit[0];
+        var timeArr = tSplit[1].split(":");
+        var hour = parseInt(timeArr[0]) % 12 === 0 ? "12" : "" + parseInt(timeArr[0]) % 12;
+        var minute = timeArr[1];
+        var amPm = parseInt(timeArr[0]) >= 12 ? "pm" : "am";
+        return month + " " + date + ", " + year + " at " + hour + ":" + minute + amPm;
+    };
     var appendEvents = function (events, timeframe) {
-        var colors = [
-            "#FFC312",
-            "#12CBC4",
-            "#A3CB38",
-            "#ED4C67",
-            "#9980FA",
-        ];
         eventsHeader.innerHTML = "<h3>" + timeframeVals[timeframe]["header"] + "</h3>";
         eventsContainer.innerHTML = "";
         if (events.length === 0) {
@@ -247,7 +276,7 @@ document.addEventListener("DOMContentLoaded", function (event) {
         // events aren't in chronological order -- sort of an issue
         events.forEach(function (evt, index) {
             var color = colors[index % colors.length];
-            eventsContainer.innerHTML += "\n        <div class=\"event-container\">\n          <div class=\"event-name\" style=\"color:" + color + ";\">" + evt.name + "</div>\n          <div class=\"event-description\">" + evt.description + "</div>\n          <div class=\"event-scheduled\">" + evt.scheduled + "</div>\n        </div>\n      ";
+            eventsContainer.innerHTML += "\n        <div class=\"event-container\">\n          <div class=\"event-name\" style=\"color:" + color + ";\">" + evt.name + "</div>\n          <div class=\"event-description\">" + evt.description + "</div>\n          <div class=\"event-scheduled\">" + parseDateTime(evt.scheduled) + "</div>\n        </div>\n      ";
         });
         var timeframeValsKeys = Object.keys(timeframeVals);
         var timeframeButtons = timeframeValsKeys.map(function (a) { return timeframeVals[a]["button"]; });
