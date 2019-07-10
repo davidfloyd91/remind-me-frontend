@@ -1,3 +1,7 @@
+// todo:
+// delete event
+// edit event
+
 const url: string = "http://localhost:8000";
 
 class ScheduledEvent {

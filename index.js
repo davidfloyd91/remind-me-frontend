@@ -1,3 +1,6 @@
+// todo:
+// delete event
+// edit event
 var url = "http://localhost:8000";
 var ScheduledEvent = /** @class */ (function () {
     function ScheduledEvent(a) {
