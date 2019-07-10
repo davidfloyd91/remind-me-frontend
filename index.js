@@ -273,7 +273,19 @@ document.addEventListener("DOMContentLoaded", function (event) {
             eventsContainer.innerHTML += "\n      <div class=\"event-container\" style=\"color:#12CBC4;\">\n        <div>\n          Nothing here!\n        </div>\n      </div>\n      ";
         }
         ;
-        // events aren't in chronological order -- sort of an issue
+        events.sort(function (a, b) {
+            var eventA = a.scheduled;
+            var eventB = b.scheduled;
+            if (eventA < eventB) {
+                return -1;
+            }
+            ;
+            if (eventA > eventB) {
+                return 1;
+            }
+            ;
+            return 0;
+        });
         events.forEach(function (evt, index) {
             var color = colors[index % colors.length];
             eventsContainer.innerHTML += "\n        <div class=\"event-container\">\n          <div class=\"event-name\" style=\"color:" + color + ";\">" + evt.name + "</div>\n          <div class=\"event-description\">" + evt.description + "</div>\n          <div class=\"event-scheduled\">" + parseDateTime(evt.scheduled) + "</div>\n        </div>\n      ";

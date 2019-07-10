@@ -320,7 +320,21 @@ document.addEventListener("DOMContentLoaded", (event) => {
       `;
     };
 
-    // events aren't in chronological order -- sort of an issue
+    events.sort((a, b) => {
+      const eventA = a.scheduled;
+      var eventB = b.scheduled;
+
+      if (eventA < eventB) {
+        return -1;
+      };
+
+      if (eventA > eventB) {
+        return 1;
+      };
+
+      return 0;
+    });
+
     events.forEach((evt, index) => {
       let color = colors[index % colors.length];
 
