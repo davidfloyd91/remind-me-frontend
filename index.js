@@ -80,20 +80,6 @@ var months = {
     "11": "Nov",
     "12": "Dec"
 };
-var shtnom = {
-    "Jan": "01",
-    "Feb": "02",
-    "Mar": "03",
-    "Apr": "04",
-    "May": "05",
-    "Jun": "06",
-    "Jul": "07",
-    "Aug": "08",
-    "Sep": "09",
-    "Oct": "10",
-    "Nov": "11",
-    "Dec": "12"
-};
 document.addEventListener("DOMContentLoaded", function (event) {
     var signupDiv = document.querySelector("#signup-div");
     var loginDiv = document.querySelector("#login-div");
@@ -393,6 +379,9 @@ document.addEventListener("DOMContentLoaded", function (event) {
             hideEventButton.style.display = "block";
             eventDiv.style.display = "block";
             handleToken(jwt, false);
+        })
+            .then(function () {
+            appendEvents([], "/today");
         })["catch"](function (err) {
             feedbackDiv.style.color = "#EA2027"; // red pigment
             feedbackDiv.innerHTML = err.message;
@@ -451,36 +440,6 @@ document.addEventListener("DOMContentLoaded", function (event) {
         eventDiv.style.display = "none";
         createEventButton.style.display = "none";
     };
-    // const convertJsDateToPq = (dateArg: string): string => {
-    //   // Wed Jul 10 2019 17:29:16 GMT-0400 (Eastern Daylight Time)
-    //   // 2019-07-10T01:00:00-04:00
-    //   const dateArr = dateArg.split(" ");
-    //   return dateArr[3] + "-" + shtnom[dateArr[1]] + "-" + dateArr[2] + "T" + dateArr[4] + "-4:00";
-    // };
-    // const findTimeframeEnd = (dateArg: string) => {
-    //   const today = new Date();
-    //   // Wed Jul 10 2019 17:29:16 GMT-0400 (Eastern Daylight Time)
-    //   const todayDate = String(today.getDate());
-    //   const pqToday = convertJsDateToPq(String(today));
-    //   // 2019-07-10T01:00:00-04:00
-    //
-    //   if (currentTimeframe) {
-    //     if (currentTimeframe === "/today") {
-    //       return [
-    //         pqToday.slice(0,8) + `${parseInt(todayDate)}T00:00:00-4:00`,
-    //         pqToday.slice(0,8) + `${parseInt(todayDate) + 1}T00:00:00-4:00`
-    //       ];
-    //     } else if (currentTimeframe === "/tomorrow") {
-    //       return [
-    //         pqToday.slice(0,8) + `${parseInt(todayDate) + 1}T00:00:00-4:00`,
-    //         pqToday.slice(0,8) + `${parseInt(todayDate) + 2}T00:00:00-4:00`
-    //       ];
-    //     } else if (currentTimeframe === "/week") {
-    //
-    //     } else if (currentTimeframe === "/all") {
-    //     };
-    //   };
-    // };
     var createEvent = function () {
         checkForUserIdAndRawToken();
         // timezone is hardcoded don't keep it that way
@@ -524,11 +483,6 @@ document.addEventListener("DOMContentLoaded", function (event) {
             eventForm.reset();
             feedbackDiv.style.color = "#12CBC4"; // blue martina
             feedbackDiv.innerHTML = "Saved!";
-            // don't compare to events, figure out the end of the timeframe
-            // if (!events[0] || eventDateTime <= events[events.length - 1].scheduled) {
-            //   events.push(new ScheduledEvent(json));
-            //   appendEvents(events, currentTimeframe);
-            // };
             getEvents(currentTimeframe);
             setTimeout(function () {
                 feedbackDiv.innerHTML = "";
