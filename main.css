@@ -75,3 +75,8 @@ h3 {
   display: inline;
   float: right;
 }
+
+#signup-div, #login-div {
+  width: 131px;
+  margin: 0 auto;
+}
