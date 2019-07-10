@@ -504,7 +504,54 @@ document.addEventListener("DOMContentLoaded", (event) => {
     createEventButton.style.display = "none";
   };
 
-  const createEvent= () => {
+  const convertPqTimeToJs = (pq: string) => {
+    // 2019-07-11T13:45:00-4:00
+    // Wed Jul 10 2019 19:23:35 GMT-0400 (Eastern Daylight Time)
+
+    const split = pq.split("-");
+    const month = months[split[1]];
+    const year = split[0];
+    const tSplit = split[2].split("T");
+    const date = tSplit[0];
+    const time = tSplit[1];
+
+    return month + " " + date + " " + year + " " + time +  " GMT-0400";
+  };
+
+  const createAlarm = (alarmName: string, scheduled: string) => {
+    const time = scheduled.slice(11, 16);
+    const timeArr = time.split(":");
+    let alarmMinute: string;
+    let alarmHour: string;
+    let alarmDate = scheduled.slice(8, 10);
+
+    if (parseInt(timeArr[1]) < 15) {
+      alarmHour = String(parseInt(timeArr[0]) - 1);
+      alarmMinute = String(parseInt(timeArr[1]) + 45);
+    } else {
+      alarmHour = timeArr[0];
+      alarmMinute = String(parseInt(timeArr[1]) - 15);
+    };
+
+    if (alarmHour === "-1") {
+      alarmHour = "23";
+      alarmDate = String(parseInt(scheduled.slice(8, 10)) - 1);
+    };
+
+    const alarmTime = convertPqTimeToJs(scheduled.slice(0, 8) + alarmDate + "T" + alarmHour + ":" + alarmMinute + ":00-4:00");
+    console.log(alarmName, alarmTime)
+
+    const unixDate = Math.round((new Date(alarmTime)).getTime());
+
+    console.log(unixDate);
+
+    chrome.alarms.create(alarmName, {when: unixDate});
+    chrome.alarms.onAlarm.addListener(() => {
+      alert("REMINDER:\n" + String(alarmName.split("%%%")[1]) + " in 15 minutes!");
+    });
+  };
+
+  const createEvent = () => {
     checkForUserIdAndRawToken();
 
     // timezone is hardcoded don't keep it that way
@@ -546,6 +593,9 @@ document.addEventListener("DOMContentLoaded", (event) => {
       eventForm.reset();
       feedbackDiv.style.color = "#12CBC4"; // blue martina
       feedbackDiv.innerHTML = "Saved!";
+
+      const alarmName = json["ID"] + "%%%" + json["name"];
+      createAlarm(alarmName, json["scheduled"]);
 
       getEvents(currentTimeframe);
 

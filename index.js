@@ -444,6 +444,46 @@ document.addEventListener("DOMContentLoaded", function (event) {
         eventDiv.style.display = "none";
         createEventButton.style.display = "none";
     };
+    var convertPqTimeToJs = function (pq) {
+        // 2019-07-11T13:45:00-4:00
+        // Wed Jul 10 2019 19:23:35 GMT-0400 (Eastern Daylight Time)
+        var split = pq.split("-");
+        var month = months[split[1]];
+        var year = split[0];
+        var tSplit = split[2].split("T");
+        var date = tSplit[0];
+        var time = tSplit[1];
+        return month + " " + date + " " + year + " " + time + " GMT-0400";
+    };
+    var createAlarm = function (alarmName, scheduled) {
+        var time = scheduled.slice(11, 16);
+        var timeArr = time.split(":");
+        var alarmMinute;
+        var alarmHour;
+        var alarmDate = scheduled.slice(8, 10);
+        if (parseInt(timeArr[1]) < 15) {
+            alarmHour = String(parseInt(timeArr[0]) - 1);
+            alarmMinute = String(parseInt(timeArr[1]) + 45);
+        }
+        else {
+            alarmHour = timeArr[0];
+            alarmMinute = String(parseInt(timeArr[1]) - 15);
+        }
+        ;
+        if (alarmHour === "-1") {
+            alarmHour = "23";
+            alarmDate = String(parseInt(scheduled.slice(8, 10)) - 1);
+        }
+        ;
+        var alarmTime = convertPqTimeToJs(scheduled.slice(0, 8) + alarmDate + "T" + alarmHour + ":" + alarmMinute + ":00-4:00");
+        console.log(alarmName, alarmTime);
+        var unixDate = Math.round((new Date(alarmTime)).getTime());
+        console.log(unixDate);
+        chrome.alarms.create(alarmName, { when: unixDate });
+        chrome.alarms.onAlarm.addListener(function () {
+            alert("REMINDER:\n" + String(alarmName.split("%%%")[1]) + " in 15 minutes!");
+        });
+    };
     var createEvent = function () {
         checkForUserIdAndRawToken();
         // timezone is hardcoded don't keep it that way
@@ -487,6 +527,8 @@ document.addEventListener("DOMContentLoaded", function (event) {
             eventForm.reset();
             feedbackDiv.style.color = "#12CBC4"; // blue martina
             feedbackDiv.innerHTML = "Saved!";
+            var alarmName = json["ID"] + "%%%" + json["name"];
+            createAlarm(alarmName, json["scheduled"]);
             getEvents(currentTimeframe);
             setTimeout(function () {
                 feedbackDiv.innerHTML = "";
