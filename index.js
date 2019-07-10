@@ -286,7 +286,9 @@ document.addEventListener("DOMContentLoaded", function (event) {
             eventsContainer.innerHTML += "\n        <div class=\"event-container\">\n          <div class=\"event-name\" style=\"color:" + color + ";\">" + evt.name + "</div>\n          <div class=\"event-description\">" + evt.description + "</div>\n          <div class=\"event-scheduled\">" + parseDateTime(evt.scheduled) + "</div>\n        </div>\n      ";
         });
         var timeframeValsKeys = Object.keys(timeframeVals);
-        var timeframeButtons = timeframeValsKeys.map(function (a) { return timeframeVals[a]["button"]; });
+        var timeframeButtons = timeframeValsKeys.map(function (a) {
+            timeframeVals[a]["button"];
+        });
         timeframeValsKeys.forEach(function (key) {
             if (timeframeVals[key]["button"] === timeframeVals[timeframe]["button"]) {
                 timeframeVals[key]["button"].disabled = true;
@@ -299,12 +301,14 @@ document.addEventListener("DOMContentLoaded", function (event) {
             ;
         });
     };
-    // local is false by default -- true only if token is fetched from Chrome local storage (meaning it's just a popup refresh)
+    // local is false by default -- true only if token is fetched from
+    // Chrome local storage (meaning it's just a popup refresh)
     var handleToken = function (jwt, local) {
         if (local === void 0) { local = false; }
         // token was sent from backend
         if (!local) {
-            // set to local storage before initializing as RawToken so format matches fetch response
+            // set to local storage before initializing as RawToken so format
+            // matches fetch response
             chrome.storage.local.remove(["token"], function () {
                 chrome.storage.local.set({ token: jwt });
             });

@@ -343,7 +343,9 @@ document.addEventListener("DOMContentLoaded", (event) => {
     });
 
     const timeframeValsKeys = Object.keys(timeframeVals);
-    const timeframeButtons = timeframeValsKeys.map((a) => timeframeVals[a]["button"]);
+    const timeframeButtons = timeframeValsKeys.map((a) => {
+      timeframeVals[a]["button"]
+    });
 
     timeframeValsKeys.forEach((key) => {
       if (timeframeVals[key]["button"] === timeframeVals[timeframe]["button"]) {
@@ -356,11 +358,13 @@ document.addEventListener("DOMContentLoaded", (event) => {
     });
   };
 
-  // local is false by default -- true only if token is fetched from Chrome local storage (meaning it's just a popup refresh)
+  // local is false by default -- true only if token is fetched from
+  // Chrome local storage (meaning it's just a popup refresh)
   const handleToken = (jwt: object, local=false) => {
     // token was sent from backend
     if (!local) {
-      // set to local storage before initializing as RawToken so format matches fetch response
+      // set to local storage before initializing as RawToken so format
+      // matches fetch response
       chrome.storage.local.remove(["token"], () => {
         chrome.storage.local.set({ token: jwt });
       });
