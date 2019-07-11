@@ -458,7 +458,7 @@ document.addEventListener("DOMContentLoaded", function (event) {
         var time = tSplit[1];
         return month + " " + date + " " + year + " " + time + " GMT-0400";
     };
-    var createAlarm = function (alarmName, scheduled) {
+    var createAlarm = function (alarmName, description, scheduled) {
         var time = scheduled.slice(11, 16);
         var timeArr = time.split(":");
         var alarmMinute;
@@ -482,8 +482,7 @@ document.addEventListener("DOMContentLoaded", function (event) {
         var unixDate = Math.round((new Date(alarmTime)).getTime());
         chrome.alarms.create(alarmName, { when: unixDate });
         chrome.alarms.onAlarm.addListener(function () {
-            alert("REMINDER:\n" + String(alarmName.split("%%%")[1]) + " in 15 minutes!");
-            chrome.alarms.clear(alarmName);
+            alert("15 minutes till event \"" + String(alarmName.split("%%%")[1]) + "\" (\"" + description.slice(0, 50) + "...\")!");
         });
     };
     var createEvent = function () {
@@ -530,7 +529,7 @@ document.addEventListener("DOMContentLoaded", function (event) {
             feedbackDiv.style.color = "#12CBC4"; // blue martina
             feedbackDiv.innerHTML = "Saved!";
             var alarmName = json["ID"] + "%%%" + json["name"];
-            createAlarm(alarmName, json["scheduled"]);
+            createAlarm(alarmName, json["description"], json["scheduled"]);
             getEvents(currentTimeframe);
             setTimeout(function () {
                 feedbackDiv.innerHTML = "";

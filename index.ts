@@ -522,7 +522,7 @@ document.addEventListener("DOMContentLoaded", (event) => {
     return month + " " + date + " " + year + " " + time +  " GMT-0400";
   };
 
-  const createAlarm = (alarmName: string, scheduled: string) => {
+  const createAlarm = (alarmName: string, description: string, scheduled: string) => {
     const time = scheduled.slice(11, 16);
     const timeArr = time.split(":");
     let alarmMinute: string;
@@ -547,8 +547,7 @@ document.addEventListener("DOMContentLoaded", (event) => {
 
     chrome.alarms.create(alarmName, {when: unixDate});
     chrome.alarms.onAlarm.addListener(() => {
-      alert("REMINDER:\n" + String(alarmName.split("%%%")[1]) + " in 15 minutes!");
-      chrome.alarms.clear(alarmName);
+      alert("15 minutes till event \"" + String(alarmName.split("%%%")[1]) + "\" (\"" + description.slice(0, 50) + "...\")!");
     });
   };
 
@@ -596,7 +595,7 @@ document.addEventListener("DOMContentLoaded", (event) => {
       feedbackDiv.innerHTML = "Saved!";
 
       const alarmName = json["ID"] + "%%%" + json["name"];
-      createAlarm(alarmName, json["scheduled"]);
+      createAlarm(alarmName, json["description"], json["scheduled"]);
 
       getEvents(currentTimeframe);
 
