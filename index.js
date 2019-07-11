@@ -58,6 +58,11 @@ var eventName;
 var eventDescription;
 var eventDate;
 var eventTime;
+// update form values
+var updateName;
+var updateDescription;
+var updateDate;
+var updateTime;
 var currentTimeframe;
 // generic error message
 var sorry = "Sorry, something went wrong!";
@@ -176,6 +181,15 @@ document.addEventListener("DOMContentLoaded", function (event) {
             deleteEvent(target.id.split(":")[1]);
         }
         ;
+        if (target.id.split(":")[0] === "update") {
+            editEvent(target.id.split(":")[1]);
+        }
+        ;
+        if (target.id.split(":")[0] === "update-submit") {
+            var id = target.id.split(":")[1];
+            updateEvent(id);
+        }
+        ;
         if (target.id === "today") {
             getEvents("/today");
         }
@@ -238,6 +252,23 @@ document.addEventListener("DOMContentLoaded", function (event) {
             eventTime = target.value;
         }
         ;
+        // update fields
+        if (target.id === "update-name") {
+            updateName = target.value;
+        }
+        ;
+        if (target.id === "update-description") {
+            updateDescription = target.value;
+        }
+        ;
+        if (target.id === "update-date") {
+            updateDate = target.value;
+        }
+        ;
+        if (target.id === "update-time") {
+            updateTime = target.value;
+        }
+        ;
     });
     document.addEventListener("submit", function (e) {
         e.preventDefault();
@@ -267,7 +298,8 @@ document.addEventListener("DOMContentLoaded", function (event) {
         var amPm = parseInt(timeArr[0]) >= 12 ? "pm" : "am";
         return month + " " + date + ", " + year + " at " + hour + ":" + minute + amPm;
     };
-    var appendEvents = function (events, timeframe) {
+    var appendEvents = function (events, timeframe, editEvent) {
+        if (editEvent === void 0) { editEvent = { id: 0, name: "", userId: 0, description: "", scheduled: "", created: "", updated: "", deleted: "" }; }
         currentTimeframe = timeframe;
         eventsHeader.innerHTML = "<h3>" + timeframeVals[timeframe]["header"] + "</h3>";
         eventsContainer.innerHTML = "";
@@ -290,7 +322,32 @@ document.addEventListener("DOMContentLoaded", function (event) {
         });
         events.forEach(function (evt, index) {
             var color = colors[index % colors.length];
-            eventsContainer.innerHTML += "\n        <div class=\"event-container\">\n          <div class=\"event-name\" style=\"color:" + color + ";\">" + evt.name + "</div>\n          <div class=\"event-description\">" + evt.description + "</div>\n          <div class=\"event-scheduled\">" + parseDateTime(evt.scheduled) + "</div>\n          <button id=\"delete:" + evt.id + "\">Delete</button>\n        </div>\n      ";
+            var dateValue;
+            var timeValue;
+            if (editEvent.scheduled[0]) {
+                var dateTimeArr = editEvent.scheduled.split("-").slice(0, 3);
+                var year = dateTimeArr[0];
+                var month_1 = dateTimeArr[1];
+                var tSplit = dateTimeArr[2].split("T");
+                var date_1 = tSplit[0];
+                var timeArr = tSplit[1].split(":");
+                var hour = timeArr[0];
+                if (!hour[1]) {
+                    hour = "0" + hour;
+                }
+                ;
+                var minute = timeArr[1];
+                dateValue = year + "-" + month_1 + "-" + date_1;
+                timeValue = hour + ":" + minute;
+            }
+            ;
+            if (editEvent.scheduled[0] && evt === editEvent) {
+                eventsContainer.innerHTML += "\n          <div class=\"event-container\">\n            <div style=\"width:80%;margin:0 auto;text-align:left;margin-bottom:3px;\">\n              <form id=\"event-form\">\n                <label for=\"update-name\">Name</label>\n                <input type=\"text\" id=\"update-name\" value=\"" + editEvent.name + "\"></input>\n                <label for=\"update-description\">Description</label>\n                <textarea id=\"update-description\">" + editEvent.description + "</textarea>\n                <label for=\"update-date\">Date</label>\n                <input type=\"date\" id=\"update-date\" value=\"" + dateValue + "\"></input>\n                <br/>\n                <label for=\"update-time\">Time</label>\n                <input type=\"time\" id=\"update-time\" value=\"" + timeValue + "\"></input>\n                <br/>\n                <br/>\n                <button type=\"submit\" class=\"margin-button\" id=\"update-submit:" + editEvent.id + "\">Submit</button>\n              </form>\n            </div>\n          </div>\n        ";
+            }
+            else {
+                eventsContainer.innerHTML += "\n          <div class=\"event-container\">\n            <div>\n              <div class=\"event-name\" style=\"color:" + color + ";\">" + evt.name + "</div>\n              <div class=\"event-description\">" + evt.description + "</div>\n              <div class=\"event-scheduled\">" + parseDateTime(evt.scheduled) + "</div>\n              <button class=\"margin-button\" id=\"update:" + evt.id + "\">Edit</button>\n              <button class=\"margin-button\" id=\"delete:" + evt.id + "\">Delete</button>\n            </div>\n          </div>\n        ";
+            }
+            ;
         });
         var timeframeValsKeys = Object.keys(timeframeVals);
         var timeframeButtons = timeframeValsKeys.map(function (a) {
@@ -556,12 +613,84 @@ document.addEventListener("DOMContentLoaded", function (event) {
             headers: {
                 "Content-Type": "application/json",
                 "Token": rawToken.token
-            }
+            },
+            body: JSON.stringify(event)
         })
             .then(function (res) {
             if (res.ok) {
                 feedbackDiv.style.color = "#EA2027"; // red pigment
                 feedbackDiv.innerHTML = "Deleted!";
+                return res.json();
+            }
+            else {
+                throw new Error(sorry);
+            }
+            ;
+        })
+            .then(function () { return getEvents(currentTimeframe); })["catch"](function (err) {
+            feedbackDiv.style.color = "#EA2027"; // red pigment
+            feedbackDiv.innerHTML = err.message;
+        });
+    };
+    var editEvent = function (id) {
+        var eventArr = events.filter(function (evt) {
+            return evt.id === parseInt(id);
+        });
+        var event = eventArr[0];
+        appendEvents(events, currentTimeframe, event);
+    };
+    var updateEvent = function (id) {
+        checkForUserIdAndRawToken();
+        var eventArr = events.filter(function (evt) {
+            return evt.id === parseInt(id);
+        });
+        var event = eventArr[0];
+        var dateTimeArr = event.scheduled.split("-").slice(0, 3);
+        var tSplit = dateTimeArr[2].split("T");
+        if (!updateDate) {
+            var year = dateTimeArr[0];
+            var month_2 = dateTimeArr[1];
+            var date_2 = tSplit[0];
+            updateDate = year + "-" + month_2 + "-" + date_2;
+        }
+        ;
+        if (!updateTime) {
+            var timeArr = tSplit[1].split(":");
+            var hour = timeArr[0];
+            if (!hour[1]) {
+                hour = "0" + hour;
+            }
+            ;
+            var minute = timeArr[1];
+            updateTime = hour + ":" + minute;
+        }
+        ;
+        if (!updateName) {
+            updateName = event.name;
+        }
+        ;
+        if (!updateDescription) {
+            updateDescription = event.description;
+        }
+        ;
+        var updateDateTime = updateDate + "T" + updateTime + ":00-04:00";
+        var data = {
+            name: updateName,
+            description: updateDescription,
+            scheduled: updateDateTime
+        };
+        fetch(url + "/users/" + userId + "/events/" + id, {
+            method: "PUT",
+            headers: {
+                "Content-Type": "application/json",
+                "Token": rawToken.token
+            },
+            body: JSON.stringify(data)
+        })
+            .then(function (res) {
+            if (res.ok) {
+                feedbackDiv.style.color = "#12CBC4"; // blue martina
+                feedbackDiv.innerHTML = "Updated!";
                 return res.json();
             }
             else {

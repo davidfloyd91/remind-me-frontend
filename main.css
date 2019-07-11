@@ -68,6 +68,10 @@ h2 {
   font-size: 1.125em;
 }
 
+.margin-button {
+  margin-bottom: 3px;
+}
+
 #events-container {
   max-height: 380px;
   overflow-y: scroll;
@@ -88,5 +92,5 @@ h3 {
 }
 
 #create-event-button, #hide-event-button {
-  margin-bottom: 8px;
+  margin-bottom: 5px;
 }

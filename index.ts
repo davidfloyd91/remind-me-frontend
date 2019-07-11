@@ -1,7 +1,3 @@
-// todo:
-// delete event
-// edit event
-
 const url: string = "http://localhost:8000";
 
 class ScheduledEvent {
@@ -85,6 +81,12 @@ let eventName: string;
 let eventDescription: string;
 let eventDate: string;
 let eventTime: string;
+
+// update form values
+let updateName: string;
+let updateDescription: string;
+let updateDate: string;
+let updateTime: string;
 
 let currentTimeframe: string;
 
@@ -211,6 +213,16 @@ document.addEventListener("DOMContentLoaded", (event) => {
       deleteEvent(target.id.split(":")[1]);
     };
 
+    if (target.id.split(":")[0] === "update") {
+      editEvent(target.id.split(":")[1]);
+    };
+
+    if (target.id.split(":")[0] === "update-submit") {
+      const id = target.id.split(":")[1];
+
+      updateEvent(id);
+    };
+
     if (target.id === "today") {
       getEvents("/today");
     };
@@ -273,6 +285,23 @@ document.addEventListener("DOMContentLoaded", (event) => {
     if (target.id === "event-time") {
       eventTime = target.value;
     };
+
+    // update fields
+    if (target.id === "update-name") {
+      updateName = target.value;
+    };
+
+    if (target.id === "update-description") {
+      updateDescription = target.value;
+    };
+
+    if (target.id === "update-date") {
+      updateDate = target.value;
+    };
+
+    if (target.id === "update-time") {
+      updateTime = target.value;
+    };
   });
 
   document.addEventListener("submit", (e) => {
@@ -306,7 +335,7 @@ document.addEventListener("DOMContentLoaded", (event) => {
     return month + " " + date + ", " + year + " at " + hour + ":" + minute + amPm;
   };
 
-  const appendEvents = (events: ScheduledEvent[], timeframe: string) => {
+  const appendEvents = (events: ScheduledEvent[], timeframe: string, editEvent=<ScheduledEvent>{id: 0, name: "", userId: 0, description: "", scheduled: "", created: "", updated: "", deleted: ""}) => {
     currentTimeframe = timeframe;
 
     eventsHeader.innerHTML = `<h3>${timeframeVals[timeframe]["header"]}</h3>`;
@@ -341,14 +370,60 @@ document.addEventListener("DOMContentLoaded", (event) => {
     events.forEach((evt, index) => {
       let color = colors[index % colors.length];
 
-      eventsContainer.innerHTML += `
-        <div class="event-container">
-          <div class="event-name" style="color:${color};">${evt.name}</div>
-          <div class="event-description">${evt.description}</div>
-          <div class="event-scheduled">${parseDateTime(evt.scheduled)}</div>
-          <button id="delete:${evt.id}">Delete</button>
-        </div>
-      `;
+      let dateValue: string;
+      let timeValue: string;
+
+      if (editEvent.scheduled[0]) {
+        const dateTimeArr = editEvent.scheduled.split("-").slice(0, 3);
+        const year = dateTimeArr[0];
+        const month = dateTimeArr[1];
+        const tSplit = dateTimeArr[2].split("T");
+        const date = tSplit[0];
+        const timeArr = tSplit[1].split(":");
+        let hour = timeArr[0];
+        if (!hour[1]) {
+          hour = "0" + hour;
+        };
+        const minute = timeArr[1];
+
+        dateValue = year + "-" + month + "-" + date;
+        timeValue = hour + ":" + minute;
+      };
+
+      if (editEvent.scheduled[0] && evt === editEvent) {
+        eventsContainer.innerHTML += `
+          <div class="event-container">
+            <div style="width:80%;margin:0 auto;text-align:left;margin-bottom:3px;">
+              <form id="event-form">
+                <label for="update-name">Name</label>
+                <input type="text" id="update-name" value="${editEvent.name}"></input>
+                <label for="update-description">Description</label>
+                <textarea id="update-description">${editEvent.description}</textarea>
+                <label for="update-date">Date</label>
+                <input type="date" id="update-date" value="${dateValue}"></input>
+                <br/>
+                <label for="update-time">Time</label>
+                <input type="time" id="update-time" value="${timeValue}"></input>
+                <br/>
+                <br/>
+                <button type="submit" class="margin-button" id="update-submit:${editEvent.id}">Submit</button>
+              </form>
+            </div>
+          </div>
+        `;
+      } else {
+        eventsContainer.innerHTML += `
+          <div class="event-container">
+            <div>
+              <div class="event-name" style="color:${color};">${evt.name}</div>
+              <div class="event-description">${evt.description}</div>
+              <div class="event-scheduled">${parseDateTime(evt.scheduled)}</div>
+              <button class="margin-button" id="update:${evt.id}">Edit</button>
+              <button class="margin-button" id="delete:${evt.id}">Delete</button>
+            </div>
+          </div>
+        `;
+      };
     });
 
     const timeframeValsKeys = Object.keys(timeframeVals);
@@ -629,11 +704,92 @@ document.addEventListener("DOMContentLoaded", (event) => {
         "Content-Type": "application/json",
         "Token": rawToken.token,
       },
+      body: JSON.stringify(event),
     })
     .then((res) => {
       if (res.ok) {
         feedbackDiv.style.color = "#EA2027"; // red pigment
         feedbackDiv.innerHTML = "Deleted!";
+        return res.json();
+      } else {
+        throw new Error(sorry);
+      };
+    })
+    .then(() => getEvents(currentTimeframe))
+    .catch((err) => {
+      feedbackDiv.style.color = "#EA2027"; // red pigment
+      feedbackDiv.innerHTML = err.message;
+    });
+  };
+
+  const editEvent = (id: string) => {
+    const eventArr = events.filter((evt) => {
+      return evt.id === parseInt(id);
+    });
+
+    const event = <ScheduledEvent>eventArr[0];
+
+    appendEvents(events, currentTimeframe, event);
+  };
+
+  const updateEvent = (id: string) => {
+    checkForUserIdAndRawToken();
+
+    const eventArr = events.filter((evt) => {
+      return evt.id === parseInt(id);
+    });
+
+    const event = <ScheduledEvent>eventArr[0];
+    const dateTimeArr = event.scheduled.split("-").slice(0, 3);
+    const tSplit = dateTimeArr[2].split("T");
+
+    if (!updateDate) {
+      const year = dateTimeArr[0];
+      const month = dateTimeArr[1];
+      const date = tSplit[0];
+
+      updateDate = year + "-" + month + "-" + date;
+    };
+
+    if (!updateTime) {
+      const timeArr = tSplit[1].split(":");
+      let hour = timeArr[0];
+      if (!hour[1]) {
+        hour = "0" + hour;
+      };
+      const minute = timeArr[1];
+
+      updateTime = hour + ":" + minute;
+    };
+
+    if (!updateName) {
+      updateName = event.name;
+    };
+
+    if (!updateDescription) {
+      updateDescription = event.description;
+    };
+
+    const updateDateTime = updateDate + "T" + updateTime + ":00-04:00";
+
+    const data = {
+      name: updateName,
+      description: updateDescription,
+      scheduled: updateDateTime
+    };
+
+    fetch(url + "/users/" + userId + "/events/" + id, {
+      method: "PUT",
+      headers: {
+        "Content-Type": "application/json",
+        "Token": rawToken.token,
+      },
+      body: JSON.stringify(data)
+    })
+    .then((res) => {
+      if (res.ok) {
+        feedbackDiv.style.color = "#12CBC4"; // blue martina
+        feedbackDiv.innerHTML = "Updated!";
         return res.json();
       } else {
         throw new Error(sorry);
