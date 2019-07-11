@@ -552,6 +552,7 @@ document.addEventListener("DOMContentLoaded", (event) => {
     chrome.alarms.create(alarmName, {when: unixDate});
     chrome.alarms.onAlarm.addListener(() => {
       alert("REMINDER:\n" + String(alarmName.split("%%%")[1]) + " in 15 minutes!");
+      chrome.alarms.clear(alarmName);
     });
   };
 
