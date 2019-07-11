@@ -636,7 +636,7 @@ document.addEventListener("DOMContentLoaded", function (event) {
         var event = eventArr[0];
         appendEvents(events, currentTimeframe, event);
     };
-    // so this is appending duplicates of random events i thought i'd deleted so that's cool
+    // if you edit time or date it adds a new event -- very tricky
     var updateEvent = function (id) {
         checkForUserIdAndRawToken();
         var eventArr = events.filter(function (evt) {

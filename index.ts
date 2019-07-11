@@ -732,7 +732,7 @@ document.addEventListener("DOMContentLoaded", (event) => {
     appendEvents(events, currentTimeframe, event);
   };
 
-  // so this is appending duplicates of random events i thought i'd deleted so that's cool
+  // if you edit time or date it adds a new event -- very tricky
   const updateEvent = (id: string) => {
     checkForUserIdAndRawToken();
 
