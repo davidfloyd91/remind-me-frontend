@@ -56,10 +56,10 @@ var eventDescription;
 var eventDate;
 var eventTime;
 // update form values
-var updateName;
-var updateDescription;
-var updateDate;
-var updateTime;
+var updateName = "";
+var updateDescription = "";
+var updateDate = "";
+var updateTime = "";
 var currentTimeframe;
 // generic error message
 var sorry = "Sorry, something went wrong!";
@@ -636,6 +636,7 @@ document.addEventListener("DOMContentLoaded", function (event) {
         var event = eventArr[0];
         appendEvents(events, currentTimeframe, event);
     };
+    // so this is appending duplicates of random events i thought i'd deleted so that's cool
     var updateEvent = function (id) {
         checkForUserIdAndRawToken();
         var eventArr = events.filter(function (evt) {
@@ -651,7 +652,7 @@ document.addEventListener("DOMContentLoaded", function (event) {
             updateDate = year + "-" + month_2 + "-" + date_2;
         }
         ;
-        if (!updateTime) {
+        if (!updateTime[0]) {
             var timeArr = tSplit[1].split(":");
             var hour = timeArr[0];
             if (!hour[1]) {
@@ -662,11 +663,11 @@ document.addEventListener("DOMContentLoaded", function (event) {
             updateTime = hour + ":" + minute;
         }
         ;
-        if (!updateName) {
+        if (!updateName[0]) {
             updateName = event.name;
         }
         ;
-        if (!updateDescription) {
+        if (!updateDescription[0]) {
             updateDescription = event.description;
         }
         ;
@@ -695,6 +696,14 @@ document.addEventListener("DOMContentLoaded", function (event) {
             }
             ;
         })
+            .then(function (json) {
+            updateName = "";
+            updateDescription = "";
+            updateDate = "";
+            updateTime = "";
+            var alarmName = json["ID"] + "%%%" + json["name"];
+            createAlarm(alarmName, json["description"], json["scheduled"]);
+        })
             .then(function () { return getEvents(currentTimeframe); })["catch"](function (err) {
             feedbackDiv.style.color = "#EA2027"; // red pigment
             feedbackDiv.innerHTML = err.message;
@@ -719,6 +728,7 @@ document.addEventListener("DOMContentLoaded", function (event) {
         })
             .then(function (eventsArr) {
             // clear events only if response is parsed
+            console.log(events);
             events = [];
             for (var _i = 0, eventsArr_1 = eventsArr; _i < eventsArr_1.length; _i++) {
                 var scheduledEvent = eventsArr_1[_i];

@@ -83,10 +83,10 @@ let eventDate: string;
 let eventTime: string;
 
 // update form values
-let updateName: string;
-let updateDescription: string;
-let updateDate: string;
-let updateTime: string;
+let updateName = "";
+let updateDescription = "";
+let updateDate = "";
+let updateTime = "";
 
 let currentTimeframe: string;
 
@@ -732,6 +732,7 @@ document.addEventListener("DOMContentLoaded", (event) => {
     appendEvents(events, currentTimeframe, event);
   };
 
+  // so this is appending duplicates of random events i thought i'd deleted so that's cool
   const updateEvent = (id: string) => {
     checkForUserIdAndRawToken();
 
@@ -751,7 +752,7 @@ document.addEventListener("DOMContentLoaded", (event) => {
       updateDate = year + "-" + month + "-" + date;
     };
 
-    if (!updateTime) {
+    if (!updateTime[0]) {
       const timeArr = tSplit[1].split(":");
       let hour = timeArr[0];
       if (!hour[1]) {
@@ -762,11 +763,11 @@ document.addEventListener("DOMContentLoaded", (event) => {
       updateTime = hour + ":" + minute;
     };
 
-    if (!updateName) {
+    if (!updateName[0]) {
       updateName = event.name;
     };
 
-    if (!updateDescription) {
+    if (!updateDescription[0]) {
       updateDescription = event.description;
     };
 
@@ -795,6 +796,15 @@ document.addEventListener("DOMContentLoaded", (event) => {
         throw new Error(sorry);
       };
     })
+    .then((json) => {
+      updateName = "";
+      updateDescription = "";
+      updateDate = "";
+      updateTime = "";
+
+      const alarmName = json["ID"] + "%%%" + json["name"];
+      createAlarm(alarmName, json["description"], json["scheduled"]);
+    })
     .then(() => getEvents(currentTimeframe))
     .catch((err) => {
       feedbackDiv.style.color = "#EA2027"; // red pigment
@@ -820,6 +830,7 @@ document.addEventListener("DOMContentLoaded", (event) => {
     })
     .then(eventsArr => {
       // clear events only if response is parsed
+      console.log(events)
       events = [];
       for (let scheduledEvent of eventsArr) {
         events.push(new ScheduledEvent(scheduledEvent));
