@@ -543,11 +543,7 @@ document.addEventListener("DOMContentLoaded", (event) => {
     };
 
     const alarmTime = convertPqTimeToJs(scheduled.slice(0, 8) + alarmDate + "T" + alarmHour + ":" + alarmMinute + ":00-4:00");
-    console.log(alarmName, alarmTime)
-
     const unixDate = Math.round((new Date(alarmTime)).getTime());
-
-    console.log(unixDate);
 
     chrome.alarms.create(alarmName, {when: unixDate});
     chrome.alarms.onAlarm.addListener(() => {

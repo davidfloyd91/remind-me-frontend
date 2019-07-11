@@ -479,9 +479,7 @@ document.addEventListener("DOMContentLoaded", function (event) {
         }
         ;
         var alarmTime = convertPqTimeToJs(scheduled.slice(0, 8) + alarmDate + "T" + alarmHour + ":" + alarmMinute + ":00-4:00");
-        console.log(alarmName, alarmTime);
         var unixDate = Math.round((new Date(alarmTime)).getTime());
-        console.log(unixDate);
         chrome.alarms.create(alarmName, { when: unixDate });
         chrome.alarms.onAlarm.addListener(function () {
             alert("REMINDER:\n" + String(alarmName.split("%%%")[1]) + " in 15 minutes!");
