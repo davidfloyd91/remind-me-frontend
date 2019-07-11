@@ -172,6 +172,10 @@ document.addEventListener("DOMContentLoaded", function (event) {
             hideEventButton.style.display = "none";
         }
         ;
+        if (target.id.split(":")[0] === "delete") {
+            deleteEvent(target.id.split(":")[1]);
+        }
+        ;
         if (target.id === "today") {
             getEvents("/today");
         }
@@ -286,7 +290,7 @@ document.addEventListener("DOMContentLoaded", function (event) {
         });
         events.forEach(function (evt, index) {
             var color = colors[index % colors.length];
-            eventsContainer.innerHTML += "\n        <div class=\"event-container\">\n          <div class=\"event-name\" style=\"color:" + color + ";\">" + evt.name + "</div>\n          <div class=\"event-description\">" + evt.description + "</div>\n          <div class=\"event-scheduled\">" + parseDateTime(evt.scheduled) + "</div>\n        </div>\n      ";
+            eventsContainer.innerHTML += "\n        <div class=\"event-container\">\n          <div class=\"event-name\" style=\"color:" + color + ";\">" + evt.name + "</div>\n          <div class=\"event-description\">" + evt.description + "</div>\n          <div class=\"event-scheduled\">" + parseDateTime(evt.scheduled) + "</div>\n          <button id=\"delete:" + evt.id + "\">Delete</button>\n        </div>\n      ";
         });
         var timeframeValsKeys = Object.keys(timeframeVals);
         var timeframeButtons = timeframeValsKeys.map(function (a) {
@@ -541,6 +545,31 @@ document.addEventListener("DOMContentLoaded", function (event) {
                 feedbackDiv.innerHTML = "";
             }, 2000);
         })["catch"](function (err) {
+            feedbackDiv.style.color = "#EA2027"; // red pigment
+            feedbackDiv.innerHTML = err.message;
+        });
+    };
+    var deleteEvent = function (eventId) {
+        checkForUserIdAndRawToken();
+        fetch(url + "/users/" + userId + "/events/" + eventId, {
+            method: "DELETE",
+            headers: {
+                "Content-Type": "application/json",
+                "Token": rawToken.token
+            }
+        })
+            .then(function (res) {
+            if (res.ok) {
+                feedbackDiv.style.color = "#EA2027"; // red pigment
+                feedbackDiv.innerHTML = "Deleted!";
+                return res.json();
+            }
+            else {
+                throw new Error(sorry);
+            }
+            ;
+        })
+            .then(function () { return getEvents(currentTimeframe); })["catch"](function (err) {
             feedbackDiv.style.color = "#EA2027"; // red pigment
             feedbackDiv.innerHTML = err.message;
         });

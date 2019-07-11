@@ -207,6 +207,10 @@ document.addEventListener("DOMContentLoaded", (event) => {
       hideEventButton.style.display = "none";
     };
 
+    if (target.id.split(":")[0] === "delete") {
+      deleteEvent(target.id.split(":")[1]);
+    };
+
     if (target.id === "today") {
       getEvents("/today");
     };
@@ -342,6 +346,7 @@ document.addEventListener("DOMContentLoaded", (event) => {
           <div class="event-name" style="color:${color};">${evt.name}</div>
           <div class="event-description">${evt.description}</div>
           <div class="event-scheduled">${parseDateTime(evt.scheduled)}</div>
+          <button id="delete:${evt.id}">Delete</button>
         </div>
       `;
     });
@@ -609,6 +614,32 @@ document.addEventListener("DOMContentLoaded", (event) => {
         feedbackDiv.innerHTML = "";
       }, 2000);
     })
+    .catch((err) => {
+      feedbackDiv.style.color = "#EA2027"; // red pigment
+      feedbackDiv.innerHTML = err.message;
+    });
+  };
+
+  const deleteEvent = (eventId: string) => {
+    checkForUserIdAndRawToken();
+
+    fetch(url + "/users/" + userId + "/events/" + eventId, {
+      method: "DELETE",
+      headers: {
+        "Content-Type": "application/json",
+        "Token": rawToken.token,
+      },
+    })
+    .then((res) => {
+      if (res.ok) {
+        feedbackDiv.style.color = "#EA2027"; // red pigment
+        feedbackDiv.innerHTML = "Deleted!";
+        return res.json();
+      } else {
+        throw new Error(sorry);
+      };
+    })
+    .then(() => getEvents(currentTimeframe))
     .catch((err) => {
       feedbackDiv.style.color = "#EA2027"; // red pigment
       feedbackDiv.innerHTML = err.message;
