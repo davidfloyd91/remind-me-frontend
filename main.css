@@ -86,3 +86,7 @@ h3 {
   width: 131px;
   margin: 0 auto;
 }
+
+#create-event-button, #hide-event-button {
+  margin-bottom: 8px;
+}
