@@ -481,8 +481,13 @@ document.addEventListener("DOMContentLoaded", function (event) {
         var alarmTime = convertPqTimeToJs(scheduled.slice(0, 8) + alarmDate + "T" + alarmHour + ":" + alarmMinute + ":00-4:00");
         var unixDate = Math.round((new Date(alarmTime)).getTime());
         chrome.alarms.create(alarmName, { when: unixDate });
-        chrome.alarms.onAlarm.addListener(function () {
-            alert("15 minutes till event \"" + String(alarmName.split("%%%")[1]) + "\" (\"" + description.slice(0, 50) + "...\")!");
+        chrome.alarms.onAlarm.addListener(function (alarm) {
+            if (alarm.name === alarmName) {
+                alert("15 minutes till event \"" + String(alarmName.split("%%%")[1]) + "\" (\"" + description + "\")!");
+                // don't believe this is working
+                chrome.alarms.clear(alarmName);
+            }
+            ;
         });
     };
     var createEvent = function () {

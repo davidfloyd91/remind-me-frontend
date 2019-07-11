@@ -38,6 +38,12 @@ h2 {
   margin-bottom: 0.5em;
 }
 
+.event-description {
+  margin: 0 auto 5px auto;
+  width: 85%;
+  word-wrap: break-word;
+}
+
 .inline-head {
   display: inline;
 }

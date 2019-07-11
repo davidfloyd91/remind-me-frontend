@@ -546,8 +546,12 @@ document.addEventListener("DOMContentLoaded", (event) => {
     const unixDate = Math.round((new Date(alarmTime)).getTime());
 
     chrome.alarms.create(alarmName, {when: unixDate});
-    chrome.alarms.onAlarm.addListener(() => {
-      alert("15 minutes till event \"" + String(alarmName.split("%%%")[1]) + "\" (\"" + description.slice(0, 50) + "...\")!");
+    chrome.alarms.onAlarm.addListener((alarm) => {
+      if (alarm.name === alarmName) {
+        alert("15 minutes till event \"" + String(alarmName.split("%%%")[1]) + "\" (\"" + description + "\")!");
+        // don't believe this is working
+        chrome.alarms.clear(alarmName);
+      };
     });
   };
 
