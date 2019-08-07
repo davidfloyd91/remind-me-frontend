@@ -1,70 +1,25 @@
 const url: string = "http://localhost:8000";
 
-class ScheduledEvent {
-  id: number;
-  userId: number;
-  name: string;
-  description: string;
-  scheduled: string;
-  created: string;
-  updated: string;
-  deleted: string;
-
-  constructor(a: any) {
-    this.id = a.ID;
-    this.userId = a.user_id;
-    this.name = a.name;
-    this.description = a.description;
-    this.scheduled = a.scheduled;
-    this.created = a.CreatedAt; // include this?
-    this.updated = a.UpdatedAt; // include this?
-    this.deleted = a.DeletedAt; // create some kind of trash?
-  }
+interface ScheduledEvent {
+  Id: number;
+  UserId: number;
+  Name: string;
+  Description: string;
+  Scheduled: string;
 }
 
-class User {
-  id: number;
-  username: string;
-  email: string;
-  created: string;
-  updated: string;
-  deleted: string;
-
-  constructor(a: any) {
-    this.id = a.ID;
-    this.username = a.username;
-    this.email = a.email;
-    this.created = a.CreatedAt; // include this?
-    this.updated = a.UpdatedAt; // this?
-    this.deleted = a.DeletedAt; // this?
-  }
-}
-
-class RawToken {
-  token: string;
-
-  constructor(a: any) {
-    this.token = a.Token;
-  }
-}
-
-class ParsedToken {
-  userId: number;
+interface ParsedToken {
+  UserId: number;
   exp: number;
-
-  constructor(a: any) {
-    this.userId = a.UserID;
-    this.exp = a.exp;
-  }
 }
 
 // jwt
-let rawToken = <RawToken>{token: ""};
+let rawToken: string = "";
 let parsedToken: ParsedToken;
 let userId = 0;
 
 // events array
-let events: ScheduledEvent[] = [];
+let events = [];
 
 // signup form values
 let signupUsername: string;
@@ -83,15 +38,15 @@ let eventDate: string;
 let eventTime: string;
 
 // update form values
-let updateName = "";
-let updateDescription = "";
-let updateDate = "";
-let updateTime = "";
+let updateName: string = "";
+let updateDescription: string = "";
+let updateDate: string = "";
+let updateTime: string = "";
 
 let currentTimeframe: string;
 
 // generic error message
-const sorry = "Sorry, something went wrong!";
+const sorry: string = "Sorry, something went wrong!";
 
 // https://flatuicolors.com/palette/nl
 const colors = [
@@ -135,15 +90,15 @@ document.addEventListener("DOMContentLoaded", (event) => {
 
   // map /events routes to headers
   const timeframeVals = {
-    "/today": {
+    "today": {
       "header": "Events today",
       "button": (() => document.querySelector("#today"))()
     },
-    "/tomorrow": {
+    "tomorrow": {
       "header": "Events tomorrow",
       "button": (() => document.querySelector("#tomorrow"))()
     },
-    "/week": {
+    "week": {
       "header": "Events this week",
       "button": (() => document.querySelector("#week"))()
     },
@@ -158,24 +113,24 @@ document.addEventListener("DOMContentLoaded", (event) => {
   let month = String(today.getMonth() + 1);
   if (month.length === 1) {
     month = "0" + month;
-  };
+  }
   let date = String(today.getDate());
   if (date.length === 1) {
     date = "0" + date;
-  };
+  }
   const minDate = today.getFullYear() + "-" + month + "-" + date;
-  eventDateInput.min = minDate
+  // eventDateInput.min = minDate
 
   // get token from local storage
   chrome.storage.local.get(["token"], (res) => {
     // if user is logged in
-    if (res["token"]) {
+    if (res.token) {
       // hide signup and login forms
       signupDiv.style.display = "none";
       loginDiv.style.display = "none";
 
-      handleToken(res["token"], true); // local is true
-    };
+      handleToken(res.token, true); // local is true
+    }
   });
 
   document.addEventListener("click", (e) => {
@@ -183,61 +138,61 @@ document.addEventListener("DOMContentLoaded", (event) => {
 
     if (target.id === "logout-button") {
       logout();
-    };
+    }
 
     if (target.id === "signup-button") {
       signupDiv.style.display = "block";
       loginDiv.style.display = "none";
       feedbackDiv.innerHTML = "";
-    };
+    }
 
     if (target.id === "login-button") {
       signupDiv.style.display = "none";
       loginDiv.style.display = "block";
       feedbackDiv.innerHTML = "";
-    };
+    }
 
     if (target.id === "create-event-button") {
       eventDiv.style.display = "block";
       createEventButton.style.display = "none";
       hideEventButton.style.display = "block";
-    };
+    }
 
     if (target.id === "hide-event-button") {
       eventDiv.style.display = "none";
       createEventButton.style.display = "block";
       hideEventButton.style.display = "none";
-    };
+    }
 
     if (target.id.split(":")[0] === "delete") {
       deleteEvent(target.id.split(":")[1]);
-    };
+    }
 
     if (target.id.split(":")[0] === "update") {
       editEvent(target.id.split(":")[1]);
-    };
+    }
 
     if (target.id.split(":")[0] === "update-submit") {
       const id = target.id.split(":")[1];
 
       updateEvent(id);
-    };
+    }
 
     if (target.id === "today") {
-      getEvents("/today");
-    };
+      getEvents("today");
+    }
 
     if (target.id === "tomorrow") {
-      getEvents("/tomorrow");
-    };
+      getEvents("tomorrow");
+    }
 
     if (target.id === "week") {
-      getEvents("/week");
-    };
+      getEvents("week");
+    }
 
     if (target.id === "all") {
       getEvents("");
-    };
+    }
   });
 
   document.addEventListener("input", (e) => {
@@ -246,62 +201,62 @@ document.addEventListener("DOMContentLoaded", (event) => {
     // signup fields
     if (target.id === "signup-username") {
       signupUsername = target.value;
-    };
+    }
 
     if (target.id === "signup-email") {
       signupEmail = target.value;
-    };
+    }
 
     if (target.id === "signup-password") {
       signupPassword = target.value;
-    };
+    }
 
     if (target.id === "signup-password-conf") {
       signupPasswordConf = target.value;
-    };
+    }
 
     // login fields
     if (target.id === "login-username") {
       loginUsername = target.value;
-    };
+    }
 
     if (target.id === "login-password") {
       loginPassword = target.value;
-    };
+    }
 
     // event fields
     if (target.id === "event-name") {
       eventName = target.value;
-    };
+    }
 
     if (target.id === "event-description") {
       eventDescription = target.value;
-    };
+    }
 
     if (target.id === "event-date") {
       eventDate = target.value;
-    };
+    }
 
     if (target.id === "event-time") {
       eventTime = target.value;
-    };
+    }
 
     // update fields
     if (target.id === "update-name") {
       updateName = target.value;
-    };
+    }
 
     if (target.id === "update-description") {
       updateDescription = target.value;
-    };
+    }
 
     if (target.id === "update-date") {
       updateDate = target.value;
-    };
+    }
 
     if (target.id === "update-time") {
       updateTime = target.value;
-    };
+    }
   });
 
   document.addEventListener("submit", (e) => {
@@ -310,15 +265,15 @@ document.addEventListener("DOMContentLoaded", (event) => {
 
     if (target.id === "signup-form") {
       signup();
-    };
+    }
 
     if (target.id === "login-form") {
       login();
-    };
+    }
 
     if (target.id === "event-form") {
       createEvent();
-    };
+    }
   });
 
   const parseDateTime = (dateTime: string): string => {
@@ -335,11 +290,9 @@ document.addEventListener("DOMContentLoaded", (event) => {
     return month + " " + date + ", " + year + " at " + hour + ":" + minute + amPm;
   };
 
-  const appendEvents = (events: ScheduledEvent[], timeframe: string, editEvent=<ScheduledEvent>{id: 0, name: "", userId: 0, description: "", scheduled: "", created: "", updated: "", deleted: ""}) => {
+  const appendEvents = (events, timeframe: string, editEvent=<ScheduledEvent>{Id: 0, UserId: 0, Name: "", Description: "", Scheduled: ""}) => {
     currentTimeframe = timeframe;
-
     eventsHeader.innerHTML = `<h3>${timeframeVals[timeframe]["header"]}</h3>`;
-
     eventsContainer.innerHTML = "";
 
     if (events.length === 0) {
@@ -350,7 +303,7 @@ document.addEventListener("DOMContentLoaded", (event) => {
         </div>
       </div>
       `;
-    };
+    }
 
     events.sort((a, b) => {
       const eventA = a.scheduled;
@@ -373,8 +326,8 @@ document.addEventListener("DOMContentLoaded", (event) => {
       let dateValue: string;
       let timeValue: string;
 
-      if (editEvent.scheduled[0]) {
-        const dateTimeArr = editEvent.scheduled.split("-").slice(0, 3);
+      if (editEvent.Scheduled[0]) {
+        const dateTimeArr = editEvent.Scheduled.split("-").slice(0, 3);
         const year = dateTimeArr[0];
         const month = dateTimeArr[1];
         const tSplit = dateTimeArr[2].split("T");
@@ -383,22 +336,22 @@ document.addEventListener("DOMContentLoaded", (event) => {
         let hour = timeArr[0];
         if (!hour[1]) {
           hour = "0" + hour;
-        };
+        }
         const minute = timeArr[1];
 
         dateValue = year + "-" + month + "-" + date;
         timeValue = hour + ":" + minute;
-      };
+      }
 
-      if (editEvent.scheduled[0] && evt === editEvent) {
+      if (editEvent.Scheduled[0] && evt === editEvent) {
         eventsContainer.innerHTML += `
           <div class="event-container">
             <div style="width:80%;margin:0 auto;text-align:left;margin-bottom:3px;">
               <form id="event-form">
                 <label for="update-name">Name</label>
-                <input type="text" id="update-name" value="${editEvent.name}"></input>
+                <input type="text" id="update-name" value="${editEvent.Name}"></input>
                 <label for="update-description">Description</label>
-                <textarea id="update-description">${editEvent.description}</textarea>
+                <textarea id="update-description">${editEvent.Description}</textarea>
                 <label for="update-date">Date</label>
                 <input type="date" id="update-date" value="${dateValue}"></input>
                 <br/>
@@ -406,7 +359,7 @@ document.addEventListener("DOMContentLoaded", (event) => {
                 <input type="time" id="update-time" value="${timeValue}"></input>
                 <br/>
                 <br/>
-                <button type="submit" class="margin-button" id="update-submit:${editEvent.id}">Submit</button>
+                <button type="submit" class="margin-button" id="update-submit:${editEvent.Id}">Submit</button>
               </form>
             </div>
           </div>
@@ -415,15 +368,15 @@ document.addEventListener("DOMContentLoaded", (event) => {
         eventsContainer.innerHTML += `
           <div class="event-container">
             <div>
-              <div class="event-name" style="color:${color};">${evt.name}</div>
-              <div class="event-description">${evt.description}</div>
-              <div class="event-scheduled">${parseDateTime(evt.scheduled)}</div>
-              <button class="margin-button" id="update:${evt.id}">Edit</button>
-              <button class="margin-button" id="delete:${evt.id}">Delete</button>
+              <div class="event-name" style="color:${color};">${evt.Name}</div>
+              <div class="event-description">${evt.Description}</div>
+              <div class="event-scheduled">${evt.Scheduled}</div>
+              <button class="margin-button" id="update:${evt.Id}">Edit</button>
+              <button class="margin-button" id="delete:${evt.Id}">Delete</button>
             </div>
           </div>
         `;
-      };
+      }
     });
 
     const timeframeValsKeys = Object.keys(timeframeVals);
@@ -438,13 +391,13 @@ document.addEventListener("DOMContentLoaded", (event) => {
       } else {
         timeframeVals[key]["button"].disabled = false;
         timeframeVals[key]["button"].classList.remove("unclickable");
-      };
+      }
     });
   };
 
   // local is false by default -- true only if token is fetched from
   // Chrome local storage (meaning it's just a popup refresh)
-  const handleToken = (jwt: object, local=false) => {
+  const handleToken = (jwt: string, local=false) => {
     // token was sent from backend
     if (!local) {
       // set to local storage before initializing as RawToken so format
@@ -455,7 +408,7 @@ document.addEventListener("DOMContentLoaded", (event) => {
     // token was fetched locally
     } else {
       createEventButton.style.display = "block";
-    };
+    }
 
     // user is logged in -- change display
     loggedInDiv.style.display = "block";
@@ -466,44 +419,44 @@ document.addEventListener("DOMContentLoaded", (event) => {
     signupForm.reset();
     loginForm.reset();
 
-    rawToken = new RawToken(jwt);
+    rawToken = jwt;
 
-    const base64Url: string = rawToken.token.split(".")[1];
+    const base64Url: string = rawToken.split(".")[1];
     const base64: string = base64Url.replace(/-/g, "+").replace(/_/g, "/");
     const jsonPayload: string = decodeURIComponent(atob(base64).split("").map((c) => {
       return "%" + ("00" + c.charCodeAt(0).toString(16)).slice(-2);
     }).join(""));
 
-    parsedToken = new ParsedToken(JSON.parse(jsonPayload));
-    userId = parsedToken.userId;
+    parsedToken = <ParsedToken>JSON.parse(jsonPayload);
+    userId = parsedToken.UserId;
 
     // grab the events today if the token was fetched locally
     if (local) {
-      getEvents("/today");
-    };
+      getEvents("today");
+    }
   };
 
   const signup = () => {
     try {
       if (signupPassword !== signupPasswordConf) {
         throw new Error("Sorry, passwords don't match!");
-      };
+      }
     }
     catch(err) {
       feedbackDiv.style.color = "#EA2027"; // red pigment
       feedbackDiv.innerHTML = err.message;
       return
-    };
+    }
 
-    fetch(url + "/signup", {
+    fetch(url + "/signup/", {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
       },
       body: JSON.stringify({
-        username: signupUsername,
-        email: signupEmail,
-        password: signupPassword
+        Username: signupUsername,
+        Email: signupEmail,
+        Password: signupPassword
       })
     })
     .then((res) => {
@@ -515,16 +468,16 @@ document.addEventListener("DOMContentLoaded", (event) => {
           throw new Error("Sorry, that username is taken!");
         } else {
           throw new Error(sorry);
-        };
+        }
       };
     })
-    .then(jwt => {
+    .then(jwtObj => {
       hideEventButton.style.display = "block";
       eventDiv.style.display = "block";
-      handleToken(jwt, false);
+      handleToken(jwtObj["Token"], false);
     })
     .then(() => {
-      appendEvents([], "/today");
+      appendEvents([], "today");
     })
     .catch((err) => {
       feedbackDiv.style.color = "#EA2027"; // red pigment
@@ -533,14 +486,14 @@ document.addEventListener("DOMContentLoaded", (event) => {
   };
 
   const login = () => {
-    fetch(url + "/login", {
+    fetch(url + "/login/", {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
       },
       body: JSON.stringify({
-        username: loginUsername,
-        password: loginPassword
+        Username: loginUsername,
+        Password: loginPassword
       })
     })
     .then((res) => {
@@ -552,15 +505,15 @@ document.addEventListener("DOMContentLoaded", (event) => {
           throw new Error("Sorry, that doesn't look right!");
         } else {
           throw new Error(sorry);
-        };
-      };
+        }
+      }
     })
-    .then((jwt) => {
+    .then((jwtObj) => {
       createEventButton.style.display = "block";
-      handleToken(jwt, false);
+      handleToken(jwtObj["Token"], false);
     })
     .then(() => {
-      getEvents("/today");
+      getEvents("today");
     })
     .catch((err) => {
       feedbackDiv.style.color = "#EA2027"; // red pigment
@@ -570,7 +523,7 @@ document.addEventListener("DOMContentLoaded", (event) => {
 
   const logout = () => {
     userId = 0;
-    rawToken.token = "";
+    rawToken = "";
 
     chrome.storage.local.remove(["token"]);
 
@@ -615,12 +568,12 @@ document.addEventListener("DOMContentLoaded", (event) => {
     } else {
       alarmHour = timeArr[0];
       alarmMinute = String(parseInt(timeArr[1]) - 15);
-    };
+    }
 
     if (alarmHour === "-1") {
       alarmHour = "23";
       alarmDate = String(parseInt(scheduled.slice(8, 10)) - 1);
-    };
+    }
 
     const alarmTime = convertPqTimeToJs(scheduled.slice(0, 8) + alarmDate + "T" + alarmHour + ":" + alarmMinute + ":00-4:00");
     const unixDate = Math.round((new Date(alarmTime)).getTime());
@@ -633,32 +586,30 @@ document.addEventListener("DOMContentLoaded", (event) => {
         alert(String(alarmName.split("%%%")[1]) + "\n\n" + description + "\n\n" + when);
         // don't believe this is working
         chrome.alarms.clear(alarmName);
-      };
+      }
     });
   };
 
   const createEvent = () => {
-    checkForUserIdAndRawToken();
-
     // timezone is hardcoded don't keep it that way
     const eventDateTime = eventDate + "T" + eventTime + ":00-04:00";
 
     try {
       if (!eventTime) {
         throw new Error("Please specify a time!");
-      };
+      }
     }
     catch(err) {
       feedbackDiv.style.color = "#EA2027"; // red pigment
       feedbackDiv.innerHTML = err.message;
       return
-    };
+    }
 
     fetch(url + "/events", {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
-        "Token": rawToken.token,
+        "Token": rawToken,
       },
       body: JSON.stringify({
         name: eventName,
@@ -673,7 +624,7 @@ document.addEventListener("DOMContentLoaded", (event) => {
         return res.json();
       } else {
         throw new Error(sorry);
-      };
+      }
     })
     .then((json) => {
       eventForm.reset();
@@ -696,13 +647,11 @@ document.addEventListener("DOMContentLoaded", (event) => {
   };
 
   const deleteEvent = (eventId: string) => {
-    checkForUserIdAndRawToken();
-
     fetch(url + "/users/" + userId + "/events/" + eventId, {
       method: "DELETE",
       headers: {
         "Content-Type": "application/json",
-        "Token": rawToken.token,
+        "Token": rawToken,
       },
       body: JSON.stringify(event),
     })
@@ -734,14 +683,12 @@ document.addEventListener("DOMContentLoaded", (event) => {
 
   // if you edit time or date it adds a new event -- very tricky
   const updateEvent = (id: string) => {
-    checkForUserIdAndRawToken();
-
     const eventArr = events.filter((evt) => {
       return evt.id === parseInt(id);
     });
 
     const event = <ScheduledEvent>eventArr[0];
-    const dateTimeArr = event.scheduled.split("-").slice(0, 3);
+    const dateTimeArr = event.Scheduled.split("-").slice(0, 3);
     const tSplit = dateTimeArr[2].split("T");
 
     if (!updateDate) {
@@ -764,11 +711,11 @@ document.addEventListener("DOMContentLoaded", (event) => {
     };
 
     if (!updateName[0]) {
-      updateName = event.name;
+      updateName = event.Name;
     };
 
     if (!updateDescription[0]) {
-      updateDescription = event.description;
+      updateDescription = event.Description;
     };
 
     const updateDateTime = updateDate + "T" + updateTime + ":00-04:00";
@@ -783,7 +730,7 @@ document.addEventListener("DOMContentLoaded", (event) => {
       method: "PUT",
       headers: {
         "Content-Type": "application/json",
-        "Token": rawToken.token,
+        "Token": rawToken,
       },
       body: JSON.stringify(data)
     })
@@ -813,11 +760,9 @@ document.addEventListener("DOMContentLoaded", (event) => {
   };
 
   const getEvents = (timeframe: string) => {
-    checkForUserIdAndRawToken();
-
-    fetch(url + "/users/" + userId + "/events" + timeframe, {
+    fetch(url + "/users/" + userId + "/events/", {
       headers: {
-        "Token": rawToken.token,
+        "Token": rawToken,
       },
     })
     .then((res) => {
@@ -826,14 +771,14 @@ document.addEventListener("DOMContentLoaded", (event) => {
         return res.json();
       } else {
         throw new Error(sorry);
-      };
+      }
     })
-    .then(eventsArr => {
+    .then((eventsArr) => {
       // clear events only if response is parsed
-      console.log(events)
       events = [];
-      for (let scheduledEvent of eventsArr) {
-        events.push(new ScheduledEvent(scheduledEvent));
+
+      for (let i = 0; i < eventsArr.length; i++) {
+        events.push(<ScheduledEvent>eventsArr[i]);
       }
     })
     .then(() => {
@@ -843,19 +788,5 @@ document.addEventListener("DOMContentLoaded", (event) => {
       feedbackDiv.style.color = "#EA2027"; // red pigment
       feedbackDiv.innerHTML = err.message;
     });
-  };
-
-  const checkForUserIdAndRawToken = () => {
-    try {
-      if (!userId || userId === 0 || !rawToken || rawToken.token === "") {
-        throw new Error(sorry);
-      };
-    }
-    catch(err) {
-      logout();
-      feedbackDiv.style.color = "#EA2027"; // red pigment
-      feedbackDiv.innerHTML = err.message;
-      return
-    };
   };
 });
